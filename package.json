@@ -1,0 +1,21 @@
+{
+  "name": "quin",
+  "version": "0.0.1",
+  "description": "Mascot of Purrquinox. A robot dog with too much sarcasm and not enough RAM.",
+  "main": "index.js",
+  "scripts": {
+    "tsc": "tsc",
+    "start": "node dist/index.js",
+    "format": "prettier --write ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Purrquinox/Quin.git"
+  },
+  "author": "Purrquinox",
+  "license": "Custom",
+  "bugs": {
+    "url": "https://github.com/Purrquinox/Quin/issues"
+  },
+  "homepage": "https://github.com/Purrquinox/Quin#readme"
+}

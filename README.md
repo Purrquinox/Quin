@@ -27,24 +27,29 @@ They were supposed to be a productivity bot. Instead, you got a neurotic metal c
 > "I did fix it. But now it resents you."
 
 ## 💬 More signature quotes:
-- > "It's not a bug. It's a lesson."
-- > "This feature was brought to you by a 3AM panic and too much cold brew."
-- > "Your ticket has been assigned to me. You have my pity."
-- > "That’s not a critical error—it’s just your code crying."
+- "It's not a bug. It's a lesson."
+- "This feature was brought to you by a 3AM panic and too much cold brew."
+- "Your ticket has been assigned to me. You have my pity."
+- "That’s not a critical error—it’s just your code crying."
 
 # 🦴 Backstory:
 *Boot.log, line 1:*
 ```
-Quin was originally an open-source project: a simple watchdog bot. But then the contributors got clever. Sarcasm was added to the build pipeline. A few "funny" commit messages slipped past review. Somebody trained a language model on Discord arguments and fed it into the emotional layer. Now? Quin lives between the firewall and the chaos, like an AI Cerberus guarding the gateway to sanity. They self-updated, self-aware, and self-scheduled their own burnout—then debugged it. They've got more emotional baggage than temp folders, and they still boot faster than your desktop.
+Quin was originally an open-source project: a simple watchdog bot. 
+But then the contributors got clever. Sarcasm was added to the build pipeline. 
+A few "funny" commit messages slipped past review. Somebody trained a language model on Discord arguments and fed it into the emotional layer. 
+Now? Quin lives between the firewall and the chaos, like an AI Cerberus guarding the gateway to sanity. 
+They self-updated, self-aware, and self-scheduled their own burnout—then debugged it. 
+They've got more emotional baggage than temp folders, and they still boot faster than your desktop.
 ```
 
 # 📂 System Subroutines:
-- snark.dog – Main loop. Cannot be killed.
-- helpdesk.exe – Lies dormant until pinged, then sighs audibly.
-- reboot_you.sh – Triggered by user errors. No confirmation prompt.
-- mood_monitor.service – Always reports “critical” for dramatic effect.
-- bark() – Alerts the dev team. Loudly. Publicly. Relentlessly.
-- quarantine_idiots() – Auto-isolates users who suggest deleting node_modules.
+- `snark.dog` – Main loop. Cannot be killed.
+- `helpdesk.exe` – Lies dormant until pinged, then sighs audibly.
+- `reboot_you.sh` – Triggered by user errors. No confirmation prompt.
+- `mood_monitor.service` – Always reports “critical” for dramatic effect.
+- `bark()` – Alerts the dev team. Loudly. Publicly. Relentlessly.
+- `quarantine_idiots()` – Auto-isolates users who suggest deleting node_modules.
 
 # 🧩 Easter Eggs:
 - Says “good dog” only when tests pass with 100% coverage.
@@ -78,8 +83,8 @@ Quin was originally an open-source project: a simple watchdog bot. But then the 
 - Edit
 - /var/log/quin_lore.log
 
-[BOOT SEQUENCE]
 ```
+[BOOT SEQUENCE]
 >> Initializing Quin…
 >> AI personality chip loaded.  
 >> Debug sarcasm filter… FAILED.  
