@@ -1,7 +1,7 @@
 export interface QuinConfig {
   name: string;
   api_port: number;
-  admins: Admin[];
+  staff: Staff[];
 
   identity: Identity;
   summary: string;
@@ -13,9 +13,10 @@ export interface QuinConfig {
   friends: Friend[];
 }
 
-export interface Admin {
+export interface Staff {
   name: string;
   discord_id: string;
+  roles: string[];
 }
 
 export interface Identity {

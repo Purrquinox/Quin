@@ -1,9 +1,31 @@
 name: Quin
 api_port: 3001
-admins:
+staff:
   - name: selectdev
+    username: selectdev
     discord_id: 564164277251080208
-
+    roles:
+      - Founder
+      - CEO of Purrquinox Global
+  - name: Ranveer Soni
+    username: ranveersoni98
+    discord_id: 787241442770419722
+    roles:
+      - CEO of Purrquinox Yugoslavia
+      - Lead Frontend Developer of AntiRaid
+  - name: Pixelated
+    username: codemeapixel
+    discord_id: 510065483693817867
+    roles:
+      - IT Administrator
+      - Server Owner
+  - name: "Exa"
+    username: "callmeabyte"
+    discord_id: 896951964234043413
+    roles:
+      - Wifey of Pixelated
+      - Design/Concept Artist for Quin
+      
 identity:
   fullName: Quin
   alias: The Woven Spark
