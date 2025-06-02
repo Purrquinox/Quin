@@ -58,28 +58,53 @@ const openai = new OpenAI({
 	baseURL: 'https://openrouter.ai/api/v1'
 });
 
-const talk = async (message: string): Promise<OpenAI.Chat.Completions.ChatCompletion> => {
-    const response = await openai.chat.completions.create({
-	    model: 'deepseek/deepseek-r1-0528:free',
-	    messages: [
-		    { role: 'system', content: personality },
-		    { role: 'user', content: message }
-	    ]
-    });
+const talk = async (
+	message: string,
+	limit: number | null
+): Promise<OpenAI.Chat.Completions.ChatCompletion> => {
+	const response = await openai.chat.completions.create({
+		model: 'deepseek/deepseek-r1-0528:free',
+		messages: [
+			{
+				role: 'system',
+				content: `${personality}\n${
+					limit != null ? ` | Keep the response ${limit - 10} characters or fewer in length.` : ''
+				}`
+			},
+			{
+				role: 'user',
+				content: `${message}${
+					limit != null ? ` | Keep the response ${limit - 10} characters or fewer in length.` : ''
+				}`
+			}
+		]
+	});
 
-    return response;
+	return response;
 };
 
-const roast = async (who: string, why: string): Promise<OpenAI.Chat.Completions.ChatCompletion> => {
-    const response = await openai.chat.completions.create({
-        model: 'deepseek/deepseek-r1-0528:free',
-        messages: [
-            { role: 'system', content: personality },
-            { role: 'user', content: `Roast ${who} for ${why}` }
-        ]
-    });
+const roast = async (
+	who: string,
+	why: string,
+	limit: number | null
+): Promise<OpenAI.Chat.Completions.ChatCompletion> => {
+	const response = await openai.chat.completions.create({
+		model: 'deepseek/deepseek-r1-0528:free',
+		messages: [
+			{
+				role: 'system',
+				content: `${personality}\n${
+					limit != null ? ` | Keep the response ${limit - 10} characters or fewer in length.` : ''
+				}`
+			},
+			{
+				role: 'user',
+				content: `Roast ${who} for ${why}`
+			}
+		]
+	});
 
-    return response;
+	return response;
 };
 
 export { talk, roast };

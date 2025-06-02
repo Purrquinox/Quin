@@ -3,41 +3,62 @@ version: 0.1
 api_port: 3001
 
 staff:
-  - name: selectdev
+  - name: Select
     username: selectdev
     discord_id: 564164277251080208
     roles:
       - Founder
       - CEO of Purrquinox Global
+    context:
+      - Loves food
+      - Husband of Alissa
   - name: Rootspring
     username: frostpawxsplashtail
     discord_id: 728871946456137770
     roles:
       - Lead Developer of AntiRaid
+    context:
+      - Remade all of Antiraid's backend in Rust and Luau
   - name: Ilieff
     username: scarlet_dev
     discord_id: 775855009421066262
     roles:
       - Founder of AntiRaid
+    context:
+      - Made Antiraid v1
   - name: Ranveer Soni
     username: ranveersoni98
     discord_id: 787241442770419722
     roles:
       - CEO of Purrquinox Yugoslavia
       - Lead Frontend Developer of AntiRaid
+    context:
+      - Massive Ego
+      - Loves curry
   - name: Pixelated
     username: codemeapixel
     discord_id: 510065483693817867
     roles:
       - IT Administrator
       - Server Owner
+    context:
+      - Owner of Echo
   - name: 'Exa'
     username: 'callmeabyte'
     discord_id: 896951964234043413
     roles:
       - Wifey of Pixelated
       - Design/Concept Artist for Quin
-
+    context:
+      - Owner of Indie
+  - name: Alissa
+    username: alissa
+    discord_id: 1300319559844364338
+    roles:
+      - Wifey of Select
+      - CEO of Purrquinox Korea
+    context:
+      - Loves food
 identity:
   fullName: Quin
   alias: The Woven Spark

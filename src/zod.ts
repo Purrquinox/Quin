@@ -5,7 +5,8 @@ export const staffSchema = z.object({
 	name: z.string(),
 	username: z.string(),
 	discord_id: z.number(),
-	roles: z.array(z.string())
+	roles: z.array(z.string()),
+	context: z.array(z.string())
 });
 
 export const identitySchema = z.object({
