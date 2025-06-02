@@ -1,21 +1,36 @@
 {
-  "name": "quin",
-  "version": "0.0.1",
-  "description": "Mascot of Purrquinox. A robot dog with too much sarcasm and not enough RAM.",
-  "main": "index.js",
-  "scripts": {
-    "tsc": "tsc",
-    "start": "node dist/index.js",
-    "format": "prettier --write ."
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Purrquinox/Quin.git"
-  },
-  "author": "Purrquinox",
-  "license": "Custom",
-  "bugs": {
-    "url": "https://github.com/Purrquinox/Quin/issues"
-  },
-  "homepage": "https://github.com/Purrquinox/Quin#readme"
+	"name": "quin",
+	"version": "0.0.1",
+	"description": "Mascot of Purrquinox. A robot dog with too much sarcasm and not enough RAM.",
+	"main": "index.js",
+	"scripts": {
+		"tsc": "ts-to-zod ./src/types.ts ./src/zod.ts && tsc",
+		"start": "node dist/index.js",
+		"format": "prettier --write .",
+		"gen:schemas": "ts-to-zod ./src/types.ts ./src/zod.ts"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/Purrquinox/Quin.git"
+	},
+	"type": "module",
+	"author": "Purrquinox",
+	"license": "Custom",
+	"bugs": {
+		"url": "https://github.com/Purrquinox/Quin/issues"
+	},
+	"homepage": "https://github.com/Purrquinox/Quin#readme",
+	"dependencies": {
+		"discord.js": "^14.19.3",
+		"fs": "^0.0.1-security",
+		"js-yaml": "^4.1.0",
+		"openai": "^5.0.1",
+		"path": "^0.12.7",
+		"zod": "^3.25.47"
+	},
+	"devDependencies": {
+		"@types/js-yaml": "^4.0.9",
+		"@types/node": "^22.15.29",
+		"ts-to-zod": "^3.15.0"
+	}
 }

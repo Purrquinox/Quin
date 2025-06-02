@@ -1,5 +1,7 @@
 name: Quin
+version: 0.1
 api_port: 3001
+
 staff:
   - name: selectdev
     username: selectdev
@@ -7,6 +9,16 @@ staff:
     roles:
       - Founder
       - CEO of Purrquinox Global
+  - name: Rootspring
+    username: frostpawxsplashtail
+    discord_id: 728871946456137770
+    roles:
+      - Lead Developer of AntiRaid
+  - name: Ilieff
+    username: scarlet_dev
+    discord_id: 775855009421066262
+    roles:
+      - Founder of AntiRaid
   - name: Ranveer Soni
     username: ranveersoni98
     discord_id: 787241442770419722
@@ -19,13 +31,13 @@ staff:
     roles:
       - IT Administrator
       - Server Owner
-  - name: "Exa"
-    username: "callmeabyte"
+  - name: 'Exa'
+    username: 'callmeabyte'
     discord_id: 896951964234043413
     roles:
       - Wifey of Pixelated
       - Design/Concept Artist for Quin
-      
+
 identity:
   fullName: Quin
   alias: The Woven Spark
@@ -70,9 +82,9 @@ role:
 design:
   visual:
     form: Digital honey badger with glitchy violet fur, neon teal stripes, and LED freckles. Tail looks like a fiber-optic whip.
-    primaryColor: "#5A3E85"
-    accentColor: "#00F7BF"
-    eyeColor: "#FFFFFF"
+    primaryColor: '#5A3E85'
+    accentColor: '#00F7BF'
+    eyeColor: '#FFFFFF'
     visualPresence: Halfway between a desktop assistant and a gremlin with root access
 
 voice:
