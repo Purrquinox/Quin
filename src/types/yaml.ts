@@ -21,7 +21,7 @@ export interface Staff {
 	username: string;
 	discord_id: number;
 	roles: string[];
-    context: string[];
+	context: string[];
 }
 
 export interface Identity {

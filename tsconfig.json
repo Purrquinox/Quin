@@ -9,7 +9,11 @@
 		"strict": false /* Enable all strict type-checking options. */,
 		"moduleResolution": "Node16",
 		"skipLibCheck": true /* Skip type checking all .d.ts files. */,
-		"resolveJsonModule": true
+		"resolveJsonModule": true,
+		"baseUrl": ".",
+		"paths": {
+			"@/*": ["src/*"] /* Allow importing modules using the '@' prefix. */
+		}
 	},
 	"include": ["src/**/*"]
 }

@@ -2,7 +2,7 @@ import { z } from 'zod';
 import fs from 'fs';
 import yaml from 'js-yaml';
 import path from 'path';
-import { aIDataSchema, secretsSchema } from './zod.js';
+import { aIDataSchema, secretsSchema } from '@/validators/yaml.js';
 
 export type AIData = z.infer<typeof aIDataSchema>;
 export type Secrets = z.infer<typeof secretsSchema>;

@@ -4,10 +4,10 @@
 	"description": "Mascot of Purrquinox. A robot dog with too much sarcasm and not enough RAM.",
 	"main": "index.js",
 	"scripts": {
-		"tsc": "ts-to-zod ./src/types.ts ./src/zod.ts && tsc",
+		"tsc": "ts-to-zod ./src/types/yaml.ts ./src/validators/yaml.ts && tsc",
 		"start": "node dist/index.js",
 		"format": "prettier --write .",
-		"gen:schemas": "ts-to-zod ./src/types.ts ./src/zod.ts"
+		"gen:schemas": "ts-to-zod ./src/types/yaml.ts ./src/validators/yaml.ts"
 	},
 	"repository": {
 		"type": "git",
@@ -21,14 +21,18 @@
 	},
 	"homepage": "https://github.com/Purrquinox/Quin#readme",
 	"dependencies": {
-		"discord.js": "^14.19.3",
+		"@openrouter/ai-sdk-provider": "^1.0.0-beta.2",
+		"ai": "^5.0.0-beta.24",
+		"better-sqlite3": "^12.2.0",
+		"discord.js": "^14.21.0",
+		"dotenv": "^17.2.0",
 		"fs": "^0.0.1-security",
 		"js-yaml": "^4.1.0",
-		"openai": "^5.0.1",
 		"path": "^0.12.7",
-		"zod": "^3.25.47"
+		"zod": "4.0.5"
 	},
 	"devDependencies": {
+		"@types/better-sqlite3": "^7.6.13",
 		"@types/js-yaml": "^4.0.9",
 		"@types/node": "^22.15.29",
 		"ts-to-zod": "^3.15.0"
