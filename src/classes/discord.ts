@@ -1,6 +1,6 @@
-import { Client, GatewayIntentBits, Partials } from 'discord.js';
+import { Client, GatewayIntentBits } from 'discord.js';
 import Database, { Database as SqliteDatabase } from 'better-sqlite3';
-import { secrets } from '@/helpers/data.js';
+import { secrets } from '../helpers/data.js';
 
 export class DiscordClient extends Client {
 	logo: string;
@@ -25,10 +25,11 @@ export class DiscordClient extends Client {
 				GatewayIntentBits.DirectMessages,
 				GatewayIntentBits.Guilds,
 				GatewayIntentBits.GuildMessages,
+				GatewayIntentBits.MessageContent,
 				GatewayIntentBits.GuildMembers,
 				GatewayIntentBits.GuildPresences
 			],
-			partials: [Partials.Channel, Partials.GuildMember, Partials.Message, Partials.User],
+			partials: [],
 			allowedMentions: {
 				parse: ['users', 'roles', 'everyone'],
 				repliedUser: true
@@ -48,7 +49,7 @@ export class DiscordClient extends Client {
 		this.database = new Database('db.sqlite');
 	}
 
-	async start() {
+	start() {
 		this.login(secrets.discord.bot_token)
 			.then(() => {
 				console.log(
@@ -62,3 +63,5 @@ export class DiscordClient extends Client {
 		return this;
 	}
 }
+
+export const discordClient = new DiscordClient();

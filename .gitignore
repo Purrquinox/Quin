@@ -1,3 +1,4 @@
 secrets.yaml
 dist
 node_modules
+db.sqlite

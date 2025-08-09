@@ -1,0 +1,6 @@
+User Info:
+- Username: ${data.userInfo.username}
+- User ID: ${data.userInfo.userId}
+- Context: ${JSON.stringify(data.userInfo.context, null, 2)}
+
+Current message: "${data.message}"

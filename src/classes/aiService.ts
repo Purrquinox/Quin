@@ -1,314 +1,444 @@
-import { generateText, tool } from 'ai';
+import OpenAI from 'openai';
 import fs from 'fs';
-import { createOpenRouter } from '@openrouter/ai-sdk-provider';
-import axios from 'axios';
-import { z } from 'zod';
-import { data } from '@/helpers/data.js';
-import path from 'path';
+import { TwitterApi } from 'twitter-api-v2';
+import { data, secrets } from '../helpers/data.js';
+import { ChatModel } from 'openai/resources';
 
 interface AIMascotConfig {
-	openRouterApiKey: string;
-	model: string;
+	model: ChatModel;
 	maxTokens: number;
 	temperature: number;
-	twitterBearerToken?: string;
-	twitterApiKey?: string;
-	twitterApiSecret?: string;
-	twitterAccessToken?: string;
-	twitterAccessSecret?: string;
-	searchApiKey?: string;
-	maxSearchResults: number;
-	searchCooldown: number;
+	enableTwitter: boolean;
+	twitterCooldown: number;
+	maxTweetLength: number;
 }
 
-const template = fs.readFileSync(path.join('../prompt.txt'), 'utf-8');
+interface UserInfo {
+	userId?: string;
+	username?: string;
+	context?: Record<string, any>;
+	discordServerId?: string;
+	discordChannelId?: string;
+}
+
+const template = fs.readFileSync('./dist/prompt.txt', 'utf-8');
 const renderTemplate = new Function('data', `return \`${template}\`;`);
 const personality = renderTemplate(data);
 
 export class AIMascotService {
-	openrouter: ReturnType<typeof createOpenRouter>;
-	config: AIMascotConfig;
-	lastSearchTime: number;
-	systemPrompt: string;
+	private openai: OpenAI;
+	private twitterClient?: TwitterApi;
+	private config: AIMascotConfig;
+	private lastTweetTime: number;
+	private systemPrompt: string;
+	private conversationHistory: Map<string, OpenAI.Chat.Completions.ChatCompletionMessageParam[]>;
 
 	constructor(config: AIMascotConfig) {
-		// Initialize OpenRouter client
-		this.openrouter = createOpenRouter({
-			apiKey: config.openRouterApiKey
+		this.openai = new OpenAI({
+			apiKey: secrets.openai.token
 		});
 
-		// Configuration
+		// Enhanced configuration with defaults
 		this.config = {
-			model: config.model,
+			model: config.model || 'gpt-4o-mini',
 			maxTokens: config.maxTokens || 2048,
 			temperature: config.temperature || 0.8,
-
-			// OpenRouter API key
-			openRouterApiKey: config.openRouterApiKey,
-
-			// Twitter/X API credentials
-			twitterBearerToken: config.twitterBearerToken,
-			twitterApiKey: config.twitterApiKey,
-			twitterApiSecret: config.twitterApiSecret,
-			twitterAccessToken: config.twitterAccessToken,
-			twitterAccessSecret: config.twitterAccessSecret,
-
-			// Search API for internet access
-			searchApiKey: config.searchApiKey,
-
-			// Rate limiting
-			maxSearchResults: config.maxSearchResults || 5,
-			searchCooldown: config.searchCooldown || 10000 // 10 seconds
+			enableTwitter: config.enableTwitter || false,
+			twitterCooldown: config.twitterCooldown || 300000, // 5 minutes
+			maxTweetLength: config.maxTweetLength || 280
 		};
 
-		// Rate limiting for searches
-		this.lastSearchTime = 0;
+		// Initialize Twitter client if enabled and credentials are available
+		if (this.config.enableTwitter && secrets.x) {
+			try {
+				this.twitterClient = new TwitterApi({
+					appKey: secrets.x.app_key,
+					appSecret: secrets.x.app_secret,
+					accessToken: secrets.x.access_token,
+					accessSecret: secrets.x.access_secret
+				});
+			} catch (error) {
+				console.warn('Failed to initialize Twitter client:', error.message);
+				this.config.enableTwitter = false;
+			}
+		}
+
+		// Rate limiting timestamps
+		this.lastTweetTime = 0;
 
 		// System prompt for the AI mascot
 		this.systemPrompt = personality;
+
+		// Conversation history for context (optional feature)
+		this.conversationHistory = new Map();
 	}
 
-	// Define available tools
-	getTools() {
-		return {
-			searchInternet: tool({
-				description:
-					'Search the internet for current information, news, or facts to enhance responses with up-to-date data',
-				parameters: z.object({
-					query: z.string().describe('The search query to find relevant information'),
-					reason: z
-						.string()
-						.describe(
-							'Why you want to search (e.g., "to fact-check", "to get current info", "to find roast material")'
-						)
-				}),
-				execute: async ({ query, reason }) => {
-					return await this.searchInternet(query, reason);
-				}
-			}),
+	// Define available tools (for function calling)
+	private getTools(): OpenAI.Chat.Completions.ChatCompletionTool[] {
+		const tools: OpenAI.Chat.Completions.ChatCompletionTool[] = [];
 
-			postTweet: tool({
-				description:
-					'Post a tweet when you have something particularly clever, funny, or noteworthy to share',
-				parameters: z.object({
-					content: z.string().max(280).describe('The tweet content (max 280 characters)'),
-					reason: z.string().describe('Why this deserves a tweet')
-				}),
-				execute: async ({ content, reason }) => {
-					return await this.postTweet(content, reason);
+		// Twitter tool
+		if (this.config.enableTwitter) {
+			tools.push({
+				type: 'function',
+				function: {
+					name: 'post_tweet',
+					description:
+						'Post a tweet to Twitter/X. Use this when you want to share something funny, roast someone (playfully), post daily affirmations, or when someone asks you to tweet something. Keep tweets engaging and true to your personality!',
+					parameters: {
+						type: 'object',
+						properties: {
+							content: {
+								type: 'string',
+								description:
+									'The tweet content. Must be engaging, witty, and under 280 characters. Can include emojis and hashtags.'
+							},
+							tweet_type: {
+								type: 'string',
+								enum: ['roast', 'affirmation', 'funny', 'requested', 'general'],
+								description: 'The type of tweet being posted'
+							},
+							context: {
+								type: 'string',
+								description:
+									"Optional context about why you're tweeting this (for logging purposes)"
+							}
+						},
+						required: ['content', 'tweet_type']
+					}
 				}
-			})
-		};
-	}
-
-	// Main chat method
-	async chat(
-		message,
-		userInfo: {
-			userId?: string;
-			username?: string;
-			context?: Record<string, any>;
+			});
 		}
-	) {
+
+		return tools;
+	}
+
+	// Main chat method with enhanced error handling
+	async chat(message: string, userInfo: UserInfo) {
 		try {
-			const { userId = 'anonymous', username = 'User', context = {} } = userInfo;
+			const contextData = { userInfo: userInfo, message: message };
 
 			// Build the user context for personalization
-			const userContext = `
-User Info:
-- Username: ${username}
-- User ID: ${userId}
-- Context: ${JSON.stringify(context, null, 2)}
+			let userContext: string;
+			try {
+				const template = fs.readFileSync('./dist/user_context.txt', 'utf-8');
+				const renderTemplate = new Function('data', `return \`${template}\`;`);
+				userContext = renderTemplate(contextData);
+			} catch (error) {
+				console.warn('Failed to load user context template:', error.message);
+				userContext = `User: ${userInfo.username || 'Anonymous'}\nMessage: ${message}`;
+			}
 
-Current message: "${message}"
-`;
+			const tools = this.getTools();
 
-			const result = await generateText({
-				model: this.openrouter(this.config.model),
-				system: this.systemPrompt,
-				prompt: userContext,
+			// Get conversation history for better context (optional)
+			const conversationId = userInfo.userId || 'default';
+			const history = this.conversationHistory.get(conversationId) || [];
+
+			// Build messages array
+			const messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [
+				{
+					role: 'system',
+					content: this.systemPrompt
+				},
+				...history.slice(-4), // Keep last 4 messages for context
+				{
+					role: 'user',
+					content: userContext
+				}
+			];
+
+			// Prepare the completion request
+			const completionParams: OpenAI.Chat.Completions.ChatCompletionCreateParamsNonStreaming = {
+				model: this.config.model,
+				messages,
 				temperature: this.config.temperature,
-				tools: this.getTools()
-			});
+				max_tokens: this.config.maxTokens,
+				tools: tools,
+				tool_choice: 'auto'
+			};
+
+			const result = await this.openai.chat.completions.create(completionParams);
+			const choice = result.choices[0];
+
+			// Handle tool calls if present
+			let finalResponse = choice.message.content || '';
+			let toolResults = [];
+
+			if (choice.message.tool_calls && choice.message.tool_calls.length > 0) {
+				toolResults = await this.handleToolCalls(choice.message.tool_calls);
+
+				// Get follow-up response after tool execution
+				const followUpMessages = [...messages, choice.message, ...toolResults];
+
+				const followUpResult = await this.openai.chat.completions.create({
+					model: this.config.model,
+					messages: followUpMessages,
+					temperature: this.config.temperature,
+					max_tokens: this.config.maxTokens
+				});
+
+				finalResponse = followUpResult.choices[0].message.content || finalResponse;
+			}
+
+			// Update conversation history
+			this.updateConversationHistory(conversationId, [
+				{ role: 'user', content: userContext },
+				{ role: 'assistant', content: finalResponse }
+			]);
 
 			return {
 				success: true,
-				response: result.text,
-				toolCalls: result.toolCalls || [],
+				response: finalResponse,
+				toolCalls: choice.message.tool_calls || [],
+				toolResults,
 				usage: result.usage,
-				finishReason: result.finishReason
+				finishReason: choice.finish_reason,
+				model: result.model,
+				id: result.id
 			};
 		} catch (error) {
 			console.error('AI Service Error:', error);
 			return {
 				success: false,
 				error: error.message,
-				response:
-					'Oops! My circuits got a bit tangled there. Even AI mascots have their off days! 🤖💥'
+				response: this.getRandomErrorMessage()
 			};
 		}
 	}
 
-	// Internet search functionality
-	async searchInternet(query, reason) {
+	// Enhanced streaming method
+	async chatStream(message: string, userInfo: UserInfo) {
 		try {
-			// Rate limiting check
-			const now = Date.now();
-			if (now - this.lastSearchTime < this.config.searchCooldown) {
-				return {
-					error: 'Search cooldown active',
-					message: 'Hold your horses! I need a moment between searches.'
-				};
+			const contextData = { userInfo, message };
+
+			let userContext: string;
+			try {
+				const template = fs.readFileSync('./dist/user_context.txt', 'utf-8');
+				const renderTemplate = new Function('data', `return \`${template}\`;`);
+				userContext = renderTemplate(contextData);
+			} catch (error) {
+				console.warn('Failed to load user context template:', error.message);
+				userContext = `User: ${userInfo.username || 'Anonymous'}\nMessage: ${message}`;
 			}
 
-			if (!this.config.searchApiKey) {
-				return {
-					error: 'No search API key configured',
-					message: 'I would search the internet for you, but I need an API key first!'
-				};
-			}
+			const tools = this.getTools();
+			const conversationId = userInfo.userId || 'default';
+			const history = this.conversationHistory.get(conversationId) || [];
 
-			// Using SerpAPI as an example - you can swap this for any search API
-			const searchUrl = 'https://serpapi.com/search';
-			const params = {
-				q: query,
-				api_key: this.config.searchApiKey,
-				engine: 'google',
-				num: this.config.maxSearchResults,
-				gl: 'us',
-				hl: 'en'
-			};
-
-			const response = await axios.get(searchUrl, { params, timeout: 10000 });
-			this.lastSearchTime = now;
-
-			if (response.data.organic_results) {
-				const results = response.data.organic_results.slice(0, this.config.maxSearchResults);
-				const searchSummary = results.map((result) => ({
-					title: result.title,
-					snippet: result.snippet,
-					link: result.link
-				}));
-
-				return {
-					success: true,
-					query,
-					reason,
-					results: searchSummary,
-					message: `Found ${results.length} results for "${query}". Time to drop some knowledge! 🔍`
-				};
-			}
-
-			return {
-				success: false,
-				message: 'Search came up empty. Even the internet is speechless!'
-			};
-		} catch (error) {
-			console.error('Search error:', error);
-			return {
-				error: 'Search failed',
-				message: 'The internet is being difficult right now. Typical! 🌐💔'
-			};
-		}
-	}
-
-	// Twitter/X posting functionality
-	async postTweet(content, reason) {
-		try {
-			if (!this.config.twitterApiKey) {
-				return {
-					error: 'No Twitter API credentials configured',
-					message: 'I would tweet this masterpiece, but I need Twitter API access first!'
-				};
-			}
-
-			// Using Twitter API v2
-			const tweetUrl = 'https://api.twitter.com/2/tweets';
-
-			// This is a simplified example - you'd need proper OAuth 1.0a signing
-			// Consider using a library like 'twitter-api-v2' for production
-			const tweetData = {
-				text: content
-			};
-
-			const response = await axios.post(tweetUrl, tweetData, {
-				headers: {
-					Authorization: `Bearer ${this.config.twitterBearerToken}`,
-					'Content-Type': 'application/json'
+			const messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [
+				{
+					role: 'system',
+					content: this.systemPrompt
 				},
-				timeout: 10000
-			});
+				...history.slice(-4),
+				{
+					role: 'user',
+					content: userContext
+				}
+			];
 
-			if (response.data.data) {
-				return {
-					success: true,
-					tweetId: response.data.data.id,
-					content,
-					reason,
-					message: `Tweet posted successfully! 🐦 Another banger for the timeline.`
-				};
-			}
+			// Prepare the streaming completion request
+			const completionParams: OpenAI.Chat.Completions.ChatCompletionCreateParamsStreaming = {
+				model: this.config.model,
+				messages,
+				temperature: this.config.temperature,
+				max_tokens: this.config.maxTokens,
+				stream: true,
+				tools: tools,
+				tool_choice: 'auto'
+			};
+
+			const stream = await this.openai.chat.completions.create(completionParams);
 
 			return {
-				success: false,
-				message: 'Tweet failed to post. Twitter is probably scared of my wit! 😏'
+				success: true,
+				stream: stream
 			};
 		} catch (error) {
-			console.error('Tweet error:', error);
-
-			if (error.response?.status === 403) {
-				return {
-					error: 'Twitter API access denied',
-					message: 'Twitter is giving me the silent treatment. Rude! 🙄'
-				};
-			}
-
+			console.error('AI Service Error:', error);
 			return {
-				error: 'Tweet failed',
-				message: 'Something went wrong with tweeting. The birds are on strike! 🐦‍💼'
+				success: false,
+				error: error.message,
+				stream: null
 			};
 		}
 	}
 
-	// Utility method to update system prompt
-	updateSystemPrompt(newPrompt) {
-		this.systemPrompt = newPrompt;
-		return { success: true, message: 'System prompt updated successfully!' };
+	// Enhanced tool call handling
+	async handleToolCalls(toolCalls: OpenAI.Chat.Completions.ChatCompletionMessageToolCall[]) {
+		const toolResponses: OpenAI.Chat.Completions.ChatCompletionToolMessageParam[] = [];
+
+		for (const toolCall of toolCalls) {
+			try {
+				const result = await this.executeToolCall(toolCall);
+
+				toolResponses.push({
+					role: 'tool',
+					tool_call_id: toolCall.id,
+					content: JSON.stringify(result)
+				});
+			} catch (error) {
+				console.error(`Tool execution error for ${toolCall.id}:`, error);
+				toolResponses.push({
+					role: 'tool',
+					tool_call_id: toolCall.id,
+					content: JSON.stringify({
+						error: error.message,
+						success: false
+					})
+				});
+			}
+		}
+
+		return toolResponses;
 	}
 
-	// Utility method to get service status
+	// Tool execution with Twitter support
+	async executeToolCall(toolCall: OpenAI.Chat.Completions.ChatCompletionMessageToolCall) {
+		if (toolCall.type !== 'function') {
+			throw new Error(`Unsupported tool call type: ${toolCall.type}`);
+		}
+
+		// Narrow type to ChatCompletionMessageFunctionToolCall
+		const funcCall = toolCall as OpenAI.Chat.Completions.ChatCompletionMessageFunctionToolCall;
+		const { name, arguments: args } = funcCall.function;
+
+		const parsedArgs = JSON.parse(args);
+
+		switch (name) {
+			case 'post_tweet':
+				return await this.postTweet(parsedArgs);
+			default:
+				throw new Error(`Tool ${name} not implemented`);
+		}
+	}
+
+	// Twitter posting functionality
+	private async postTweet(args: { content: string; tweet_type: string; context?: string }) {
+		if (!this.config.enableTwitter || !this.twitterClient) {
+			throw new Error('Twitter functionality is not enabled or configured');
+		}
+
+		// Rate limiting check
+		const now = Date.now();
+		if (now - this.lastTweetTime < this.config.twitterCooldown) {
+			const remainingTime = Math.ceil(
+				(this.config.twitterCooldown - (now - this.lastTweetTime)) / 1000
+			);
+			throw new Error(`Tweet cooldown active. Please wait ${remainingTime} seconds.`);
+		}
+
+		// Validate tweet content
+		if (!args.content || args.content.trim().length === 0) {
+			throw new Error('Tweet content cannot be empty');
+		}
+
+		if (args.content.length > this.config.maxTweetLength) {
+			throw new Error(`Tweet too long. Maximum ${this.config.maxTweetLength} characters allowed.`);
+		}
+
+		try {
+			// Post the tweet
+			const tweet = await this.twitterClient.v2.tweet(args.content);
+
+			// Update last tweet time
+			this.lastTweetTime = now;
+
+			// Log the tweet for monitoring
+			console.log(`Tweet posted [${args.tweet_type}]:`, args.content);
+			if (args.context) {
+				console.log(`Context:`, args.context);
+			}
+
+			return {
+				success: true,
+				tweet_id: `heypurrquinox/${tweet.data.id}`,
+				tweet_type: args.tweet_type,
+				content: args.content,
+				posted_at: new Date().toISOString(),
+				message: 'Tweet posted successfully! 🐦✨'
+			};
+		} catch (error) {
+			console.error('Twitter API Error:', error);
+			throw new Error(`Failed to post tweet: ${error.message}`);
+		}
+	}
+
+	// Conversation history management
+	private updateConversationHistory(
+		conversationId: string,
+		messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[]
+	) {
+		const current = this.conversationHistory.get(conversationId) || [];
+		const updated = [...current, ...messages];
+
+		// Keep only the last 10 messages to prevent memory issues
+		const trimmed = updated.slice(-10);
+		this.conversationHistory.set(conversationId, trimmed);
+	}
+
+	// Clear conversation history for a user
+	clearConversationHistory(conversationId: string) {
+		this.conversationHistory.delete(conversationId);
+	}
+
+	// Get random error message for personality
+	private getRandomErrorMessages(): string[] {
+		return [
+			'Oops! My circuits got a bit tangled there. Even AI mascots have their off days! 🤖💥',
+			"*System overload detected* Just kidding! Something went wrong, but I'm still fabulous! ✨",
+			"Error 404: Sass not found... wait, that can't be right! Let me try that again! 💅",
+			'Beep boop! Even digital beings need a coffee break sometimes! ☕🤖',
+			'My bad! Looks like I tried to be too clever and broke something. Classic me! 😅'
+		];
+	}
+
+	private getRandomErrorMessage(): string {
+		const messages = this.getRandomErrorMessages();
+		return messages[Math.floor(Math.random() * messages.length)];
+	}
+
+	// Enhanced utility method to get service status
 	getStatus() {
 		return {
 			model: this.config.model,
-			hasSearchApi: !!this.config.searchApiKey,
-			hasTwitterApi: !!this.config.twitterApiKey,
-			lastSearchTime: this.lastSearchTime,
-			searchCooldownRemaining: Math.max(
+			twitterEnabled: this.config.enableTwitter,
+			lastTweetTime: this.lastTweetTime,
+			tweetCooldownRemaining: Math.max(
 				0,
-				this.config.searchCooldown - (Date.now() - this.lastSearchTime)
-			)
+				this.config.twitterCooldown - (Date.now() - this.lastTweetTime)
+			),
+			activeConversations: this.conversationHistory.size
 		};
 	}
+
+	// Method to manually trigger a tweet (for admin use)
+	async manualTweet(content: string, tweetType: string = 'general', context?: string) {
+		return await this.postTweet({ content, tweet_type: tweetType, context });
+	}
+
+	// Get tweet suggestions based on recent conversations
+	async getTweetSuggestions(limit: number = 3) {
+		const suggestions = [];
+
+		// This could analyze recent conversations and suggest tweets
+		// For now, just return some example suggestions
+		suggestions.push(
+			{
+				type: 'affirmation',
+				content: "Remember: You're not just surviving, you're thriving! 🌟 #MondayMotivation"
+			},
+			{ type: 'funny', content: 'Me: *exists*\nBugs: "And I took that personally" 🐛💻 #DevLife' },
+			{
+				type: 'roast',
+				content:
+					"Just witnessed someone try to center a div for 3 hours. I can't even... 🤦‍♀️ #CSSStruggles"
+			}
+		);
+
+		return suggestions.slice(0, limit);
+	}
 }
-
-// Example usage:
-/*
-const aiService = new AIMascotService({
-  openRouterApiKey: 'your-openrouter-key',
-  searchApiKey: 'your-serpapi-key',
-  twitterBearerToken: 'your-twitter-bearer-token',
-  model: 'anthropic/claude-3.5-sonnet',
-  temperature: 0.8,
-});
-
-const userInfo = {
-  userId: '12345',
-  username: 'cooluser',
-  context: { previousRoasts: 2, helpfulInteractions: 5 }
-};
-
-const response = await aiService.chat("Roast my coding skills", userInfo);
-console.log(response.response);
-*/
 
 export default AIMascotService;

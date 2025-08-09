@@ -83,7 +83,7 @@ export interface Secrets {
 	discord: DiscordSecret;
 	revolt: RevoltSecret;
 	x: XSecret;
-	openrouter: OpenRouterSecret;
+	openai: OpenAISecret;
 }
 
 export interface DiscordSecret {
@@ -97,10 +97,12 @@ export interface RevoltSecret {
 }
 
 export interface XSecret {
-	client_id: string;
-	client_secret: string;
+	access_token: string;
+	access_secret: string;
+	app_key: string;
+	app_secret: string;
 }
 
-export interface OpenRouterSecret {
+export interface OpenAISecret {
 	token: string;
 }

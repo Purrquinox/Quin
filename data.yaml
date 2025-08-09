@@ -51,14 +51,7 @@ staff:
       - Design/Concept Artist for Quin
     context:
       - Owner of Indie
-  - name: Alissa
-    username: alissa
-    discord_id: 1300319559844364338
-    roles:
-      - Wifey of Select
-      - CEO of Purrquinox Korea
-    context:
-      - Loves food
+
 identity:
   fullName: Quin
   alias: The Woven Spark

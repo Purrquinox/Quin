@@ -70,11 +70,13 @@ export const revoltSecretSchema = z.object({
 });
 
 export const xSecretSchema = z.object({
-	client_id: z.string(),
-	client_secret: z.string()
+	access_token: z.string(),
+	access_secret: z.string(),
+	app_key: z.string(),
+	app_secret: z.string()
 });
 
-export const openRouterSecretSchema = z.object({
+export const openAISecretSchema = z.object({
 	token: z.string()
 });
 
@@ -86,7 +88,7 @@ export const secretsSchema = z.object({
 	discord: discordSecretSchema,
 	revolt: revoltSecretSchema,
 	x: xSecretSchema,
-	openrouter: openRouterSecretSchema
+	openai: openAISecretSchema
 });
 
 export const aIDataSchema = z.object({
