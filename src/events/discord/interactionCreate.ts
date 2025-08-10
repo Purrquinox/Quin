@@ -1,8 +1,9 @@
 import { CacheType, Interaction } from 'discord.js';
+import { DiscordClient } from 'src/classes/discord.js';
 
 const interactionCreate = async (interaction: Interaction<CacheType>) => {
 	try {
-		const client = interaction.client;
+		const client = interaction.client as DiscordClient;
 
 		// Handle slash commands
 		if (interaction.isChatInputCommand()) {

@@ -35,6 +35,10 @@ staff:
     context:
       - Massive Ego
       - Loves curry
+      -  Indian
+      - Remade AntiRaid's Frontend in a Day
+      - Mentored by CodeMeAPixel
+      - English is out of the question for this person
   - name: Pixelated
     username: codemeapixel
     discord_id: 510065483693817867

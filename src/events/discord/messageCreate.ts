@@ -2,7 +2,7 @@ import { Message, OmitPartialGroupDMChannel } from 'discord.js';
 import { DiscordClient } from 'src/classes/discord.js';
 
 const messageCreate = async (message: OmitPartialGroupDMChannel<Message<boolean>>) => {
-	const client = message.client;
+	const client = message.client as DiscordClient;
 
 	// Ignore messages from bots
 	if (message.author.bot) return;
