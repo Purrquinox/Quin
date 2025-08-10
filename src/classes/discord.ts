@@ -45,35 +45,35 @@ export class DiscordClient extends Client {
 	public triggers = new Collection<string, Trigger>();
 
 	constructor() {
-		super({
-			intents: [
-				GatewayIntentBits.DirectMessages,
-				GatewayIntentBits.Guilds,
-				GatewayIntentBits.GuildMessages,
-				GatewayIntentBits.MessageContent,
-				GatewayIntentBits.GuildMembers,
-				GatewayIntentBits.GuildPresences
-			],
-			partials: [],
-			allowedMentions: {
-				parse: ['users', 'roles', 'everyone'],
-				repliedUser: true
-			}
-		});
+    super({
+      intents: [
+        GatewayIntentBits.DirectMessages,
+        GatewayIntentBits.Guilds,
+        GatewayIntentBits.GuildMessages,
+        GatewayIntentBits.MessageContent,
+        GatewayIntentBits.GuildMembers,
+        GatewayIntentBits.GuildPresences
+      ],
+      partials: [],
+      allowedMentions: {
+        parse: ['users', 'roles', 'everyone'],
+        repliedUser: true
+      }
+    });
 
-		this.logo = 'https://purrquinox.com/logo.png';
-		this.footer = `© ${new Date().getFullYear()} - Purrquinox`;
-		this.colors = {
-			primary: '#ffb6c1',
-			secondary: '#ffc0cb',
-			tertiary: '#ff69b4',
-			success: '#32cd32',
-			error: '#ff4500',
-			warning: '#ffa500'
-		} as const;
+    this.logo = 'https://purrquinox.com/logo.png';
+    this.footer = `© ${new Date().getFullYear()} - Purrquinox`;
+    this.colors = {
+      primary: '#ffb6c1',
+      secondary: '#ffc0cb',
+      tertiary: '#ff69b4',
+      success: '#32cd32',
+      error: '#ff4500',
+      warning: '#ffa500'
+    } as const;
 
-		this.database = new DatabaseManager();
-	}
+    this.database = new DatabaseManager();
+  }
 
 	/**
 	 * Check if a user is on cooldown for a specific command
