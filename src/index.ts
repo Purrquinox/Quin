@@ -2,7 +2,7 @@ import { AIMascotService } from './classes/aiService.js';
 import { discordClient } from './classes/discord.js';
 
 const aiService = new AIMascotService({
-	model: 'gpt-4',
+	model: 'gpt-3.5-turbo',
 	maxTokens: 2048,
 	temperature: 0.2,
 	enableTwitter: true,
