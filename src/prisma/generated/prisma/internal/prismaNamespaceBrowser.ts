@@ -338,8 +338,9 @@ export const QuinConversationScalarFieldEnum = {
 	id: 'id',
 	userId: 'userId',
 	username: 'username',
-	discordServerId: 'discordServerId',
-	discordChannelId: 'discordChannelId',
+	platform: 'platform',
+	serverId: 'serverId',
+	channelId: 'channelId',
 	createdAt: 'createdAt',
 	updatedAt: 'updatedAt'
 } as const;

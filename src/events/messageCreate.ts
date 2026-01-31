@@ -1,4 +1,4 @@
-import { Message, OmitPartialGroupDMChannel } from 'discord.js';
+import { EmbedBuilder, Message, OmitPartialGroupDMChannel } from 'discord.js';
 import { DiscordClient } from '../discord.js';
 import AIMascotService from '../ai.js';
 
@@ -43,8 +43,9 @@ const messageCreate = async (message: OmitPartialGroupDMChannel<Message<boolean>
 			const userInfo = {
 				userId: message.author.id,
 				username: message.author.username,
-				discordServerId: message.guildId || undefined,
-				discordChannelId: message.channelId,
+				serverId: message.guildId || undefined,
+				channelId: message.channelId,
+				platform: 'discord',
 				context: {
 					displayName: message.member?.displayName || message.author.displayName,
 					isAdmin: message.member?.permissions.has('Administrator') || false,
@@ -57,15 +58,28 @@ const messageCreate = async (message: OmitPartialGroupDMChannel<Message<boolean>
 
 			if (result.success && result.response) {
 				// Split long responses if needed (Discord has 2000 char limit)
+				let notice: string | null = null;
 				const responses = splitMessage(result.response, 2000);
-
-				for (const response of responses) {
-					await message.reply(response);
-				}
 
 				// Log tool calls if any
 				if (result.toolCalls && result.toolCalls.length > 0) {
-					console.log('Tool calls executed:', result.toolCalls);
+					if (result.toolCalls.filter((tc) => tc.toolName === 'learn_user_fact').length > 0) {
+						notice =
+							'🧠 I have learned new information about you and saved it for future conversations!';
+					} else if (
+						result.toolCalls.filter((tc) => tc.toolName === 'search_internet').length > 0
+					) {
+						notice = '🔍 I have looked up some information on the internet to assist you.';
+					}
+				}
+
+				for (const response of responses) {
+					if (notice)
+						await message.reply({
+							content: response,
+							embeds: [new EmbedBuilder().setDescription(notice)]
+						});
+					else await message.reply({ content: response });
 				}
 			} else {
 				await message.reply(result.response || 'Sorry, something went wrong! 😅');

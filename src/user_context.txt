@@ -1,4 +1,2 @@
 User: ${data.userInfo.username}
-${data.learnedContext ? `[Already saved facts - DO NOT use learn_user_fact for these: ${data.learnedContext}]` : ''}
-
-${data.message}
+${data.learnedContext ? `[Already saved facts - DO NOT use learn_user_fact for these: ${data.learnedContext}]` : '[No saved facts yet - feel free to learn about this user!]'}

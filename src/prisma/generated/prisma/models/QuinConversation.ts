@@ -38,8 +38,9 @@ export type QuinConversationMinAggregateOutputType = {
 	id: number | null;
 	userId: string | null;
 	username: string | null;
-	discordServerId: string | null;
-	discordChannelId: string | null;
+	platform: string | null;
+	serverId: string | null;
+	channelId: string | null;
 	createdAt: Date | null;
 	updatedAt: Date | null;
 };
@@ -48,8 +49,9 @@ export type QuinConversationMaxAggregateOutputType = {
 	id: number | null;
 	userId: string | null;
 	username: string | null;
-	discordServerId: string | null;
-	discordChannelId: string | null;
+	platform: string | null;
+	serverId: string | null;
+	channelId: string | null;
 	createdAt: Date | null;
 	updatedAt: Date | null;
 };
@@ -58,8 +60,9 @@ export type QuinConversationCountAggregateOutputType = {
 	id: number;
 	userId: number;
 	username: number;
-	discordServerId: number;
-	discordChannelId: number;
+	platform: number;
+	serverId: number;
+	channelId: number;
 	createdAt: number;
 	updatedAt: number;
 	_all: number;
@@ -77,8 +80,9 @@ export type QuinConversationMinAggregateInputType = {
 	id?: true;
 	userId?: true;
 	username?: true;
-	discordServerId?: true;
-	discordChannelId?: true;
+	platform?: true;
+	serverId?: true;
+	channelId?: true;
 	createdAt?: true;
 	updatedAt?: true;
 };
@@ -87,8 +91,9 @@ export type QuinConversationMaxAggregateInputType = {
 	id?: true;
 	userId?: true;
 	username?: true;
-	discordServerId?: true;
-	discordChannelId?: true;
+	platform?: true;
+	serverId?: true;
+	channelId?: true;
 	createdAt?: true;
 	updatedAt?: true;
 };
@@ -97,8 +102,9 @@ export type QuinConversationCountAggregateInputType = {
 	id?: true;
 	userId?: true;
 	username?: true;
-	discordServerId?: true;
-	discordChannelId?: true;
+	platform?: true;
+	serverId?: true;
+	channelId?: true;
 	createdAt?: true;
 	updatedAt?: true;
 	_all?: true;
@@ -199,8 +205,9 @@ export type QuinConversationGroupByOutputType = {
 	id: number;
 	userId: string;
 	username: string;
-	discordServerId: string | null;
-	discordChannelId: string | null;
+	platform: string;
+	serverId: string | null;
+	channelId: string | null;
 	createdAt: Date;
 	updatedAt: Date;
 	_count: QuinConversationCountAggregateOutputType | null;
@@ -230,8 +237,9 @@ export type QuinConversationWhereInput = {
 	id?: Prisma.IntFilter<'QuinConversation'> | number;
 	userId?: Prisma.StringFilter<'QuinConversation'> | string;
 	username?: Prisma.StringFilter<'QuinConversation'> | string;
-	discordServerId?: Prisma.StringNullableFilter<'QuinConversation'> | string | null;
-	discordChannelId?: Prisma.StringNullableFilter<'QuinConversation'> | string | null;
+	platform?: Prisma.StringFilter<'QuinConversation'> | string;
+	serverId?: Prisma.StringNullableFilter<'QuinConversation'> | string | null;
+	channelId?: Prisma.StringNullableFilter<'QuinConversation'> | string | null;
 	createdAt?: Prisma.DateTimeFilter<'QuinConversation'> | Date | string;
 	updatedAt?: Prisma.DateTimeFilter<'QuinConversation'> | Date | string;
 	QuinConversationMessage?: Prisma.QuinConversationMessageListRelationFilter;
@@ -245,8 +253,9 @@ export type QuinConversationOrderByWithRelationInput = {
 	id?: Prisma.SortOrder;
 	userId?: Prisma.SortOrder;
 	username?: Prisma.SortOrder;
-	discordServerId?: Prisma.SortOrderInput | Prisma.SortOrder;
-	discordChannelId?: Prisma.SortOrderInput | Prisma.SortOrder;
+	platform?: Prisma.SortOrder;
+	serverId?: Prisma.SortOrderInput | Prisma.SortOrder;
+	channelId?: Prisma.SortOrderInput | Prisma.SortOrder;
 	createdAt?: Prisma.SortOrder;
 	updatedAt?: Prisma.SortOrder;
 	QuinConversationMessage?: Prisma.QuinConversationMessageOrderByRelationAggregateInput;
@@ -261,8 +270,9 @@ export type QuinConversationWhereUniqueInput = Prisma.AtLeast<
 		NOT?: Prisma.QuinConversationWhereInput | Prisma.QuinConversationWhereInput[];
 		userId?: Prisma.StringFilter<'QuinConversation'> | string;
 		username?: Prisma.StringFilter<'QuinConversation'> | string;
-		discordServerId?: Prisma.StringNullableFilter<'QuinConversation'> | string | null;
-		discordChannelId?: Prisma.StringNullableFilter<'QuinConversation'> | string | null;
+		platform?: Prisma.StringFilter<'QuinConversation'> | string;
+		serverId?: Prisma.StringNullableFilter<'QuinConversation'> | string | null;
+		channelId?: Prisma.StringNullableFilter<'QuinConversation'> | string | null;
 		createdAt?: Prisma.DateTimeFilter<'QuinConversation'> | Date | string;
 		updatedAt?: Prisma.DateTimeFilter<'QuinConversation'> | Date | string;
 		QuinConversationMessage?: Prisma.QuinConversationMessageListRelationFilter;
@@ -278,8 +288,9 @@ export type QuinConversationOrderByWithAggregationInput = {
 	id?: Prisma.SortOrder;
 	userId?: Prisma.SortOrder;
 	username?: Prisma.SortOrder;
-	discordServerId?: Prisma.SortOrderInput | Prisma.SortOrder;
-	discordChannelId?: Prisma.SortOrderInput | Prisma.SortOrder;
+	platform?: Prisma.SortOrder;
+	serverId?: Prisma.SortOrderInput | Prisma.SortOrder;
+	channelId?: Prisma.SortOrderInput | Prisma.SortOrder;
 	createdAt?: Prisma.SortOrder;
 	updatedAt?: Prisma.SortOrder;
 	_count?: Prisma.QuinConversationCountOrderByAggregateInput;
@@ -300,8 +311,9 @@ export type QuinConversationScalarWhereWithAggregatesInput = {
 	id?: Prisma.IntWithAggregatesFilter<'QuinConversation'> | number;
 	userId?: Prisma.StringWithAggregatesFilter<'QuinConversation'> | string;
 	username?: Prisma.StringWithAggregatesFilter<'QuinConversation'> | string;
-	discordServerId?: Prisma.StringNullableWithAggregatesFilter<'QuinConversation'> | string | null;
-	discordChannelId?: Prisma.StringNullableWithAggregatesFilter<'QuinConversation'> | string | null;
+	platform?: Prisma.StringWithAggregatesFilter<'QuinConversation'> | string;
+	serverId?: Prisma.StringNullableWithAggregatesFilter<'QuinConversation'> | string | null;
+	channelId?: Prisma.StringNullableWithAggregatesFilter<'QuinConversation'> | string | null;
 	createdAt?: Prisma.DateTimeWithAggregatesFilter<'QuinConversation'> | Date | string;
 	updatedAt?: Prisma.DateTimeWithAggregatesFilter<'QuinConversation'> | Date | string;
 };
@@ -309,8 +321,9 @@ export type QuinConversationScalarWhereWithAggregatesInput = {
 export type QuinConversationCreateInput = {
 	userId: string;
 	username: string;
-	discordServerId?: string | null;
-	discordChannelId?: string | null;
+	platform?: string;
+	serverId?: string | null;
+	channelId?: string | null;
 	createdAt?: Date | string;
 	updatedAt?: Date | string;
 	QuinConversationMessage?: Prisma.QuinConversationMessageCreateNestedManyWithoutQuinConversationInput;
@@ -321,8 +334,9 @@ export type QuinConversationUncheckedCreateInput = {
 	id?: number;
 	userId: string;
 	username: string;
-	discordServerId?: string | null;
-	discordChannelId?: string | null;
+	platform?: string;
+	serverId?: string | null;
+	channelId?: string | null;
 	createdAt?: Date | string;
 	updatedAt?: Date | string;
 	QuinConversationMessage?: Prisma.QuinConversationMessageUncheckedCreateNestedManyWithoutQuinConversationInput;
@@ -332,8 +346,9 @@ export type QuinConversationUncheckedCreateInput = {
 export type QuinConversationUpdateInput = {
 	userId?: Prisma.StringFieldUpdateOperationsInput | string;
 	username?: Prisma.StringFieldUpdateOperationsInput | string;
-	discordServerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
-	discordChannelId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+	platform?: Prisma.StringFieldUpdateOperationsInput | string;
+	serverId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+	channelId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
 	createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 	updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 	QuinConversationMessage?: Prisma.QuinConversationMessageUpdateManyWithoutQuinConversationNestedInput;
@@ -344,8 +359,9 @@ export type QuinConversationUncheckedUpdateInput = {
 	id?: Prisma.IntFieldUpdateOperationsInput | number;
 	userId?: Prisma.StringFieldUpdateOperationsInput | string;
 	username?: Prisma.StringFieldUpdateOperationsInput | string;
-	discordServerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
-	discordChannelId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+	platform?: Prisma.StringFieldUpdateOperationsInput | string;
+	serverId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+	channelId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
 	createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 	updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 	QuinConversationMessage?: Prisma.QuinConversationMessageUncheckedUpdateManyWithoutQuinConversationNestedInput;
@@ -356,8 +372,9 @@ export type QuinConversationCreateManyInput = {
 	id?: number;
 	userId: string;
 	username: string;
-	discordServerId?: string | null;
-	discordChannelId?: string | null;
+	platform?: string;
+	serverId?: string | null;
+	channelId?: string | null;
 	createdAt?: Date | string;
 	updatedAt?: Date | string;
 };
@@ -365,8 +382,9 @@ export type QuinConversationCreateManyInput = {
 export type QuinConversationUpdateManyMutationInput = {
 	userId?: Prisma.StringFieldUpdateOperationsInput | string;
 	username?: Prisma.StringFieldUpdateOperationsInput | string;
-	discordServerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
-	discordChannelId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+	platform?: Prisma.StringFieldUpdateOperationsInput | string;
+	serverId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+	channelId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
 	createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 	updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 };
@@ -375,8 +393,9 @@ export type QuinConversationUncheckedUpdateManyInput = {
 	id?: Prisma.IntFieldUpdateOperationsInput | number;
 	userId?: Prisma.StringFieldUpdateOperationsInput | string;
 	username?: Prisma.StringFieldUpdateOperationsInput | string;
-	discordServerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
-	discordChannelId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+	platform?: Prisma.StringFieldUpdateOperationsInput | string;
+	serverId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+	channelId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
 	createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 	updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 };
@@ -385,8 +404,9 @@ export type QuinConversationCountOrderByAggregateInput = {
 	id?: Prisma.SortOrder;
 	userId?: Prisma.SortOrder;
 	username?: Prisma.SortOrder;
-	discordServerId?: Prisma.SortOrder;
-	discordChannelId?: Prisma.SortOrder;
+	platform?: Prisma.SortOrder;
+	serverId?: Prisma.SortOrder;
+	channelId?: Prisma.SortOrder;
 	createdAt?: Prisma.SortOrder;
 	updatedAt?: Prisma.SortOrder;
 };
@@ -399,8 +419,9 @@ export type QuinConversationMaxOrderByAggregateInput = {
 	id?: Prisma.SortOrder;
 	userId?: Prisma.SortOrder;
 	username?: Prisma.SortOrder;
-	discordServerId?: Prisma.SortOrder;
-	discordChannelId?: Prisma.SortOrder;
+	platform?: Prisma.SortOrder;
+	serverId?: Prisma.SortOrder;
+	channelId?: Prisma.SortOrder;
 	createdAt?: Prisma.SortOrder;
 	updatedAt?: Prisma.SortOrder;
 };
@@ -409,8 +430,9 @@ export type QuinConversationMinOrderByAggregateInput = {
 	id?: Prisma.SortOrder;
 	userId?: Prisma.SortOrder;
 	username?: Prisma.SortOrder;
-	discordServerId?: Prisma.SortOrder;
-	discordChannelId?: Prisma.SortOrder;
+	platform?: Prisma.SortOrder;
+	serverId?: Prisma.SortOrder;
+	channelId?: Prisma.SortOrder;
 	createdAt?: Prisma.SortOrder;
 	updatedAt?: Prisma.SortOrder;
 };
@@ -479,8 +501,9 @@ export type QuinConversationUpdateOneRequiredWithoutQuinConversationSummaryNeste
 export type QuinConversationCreateWithoutQuinConversationMessageInput = {
 	userId: string;
 	username: string;
-	discordServerId?: string | null;
-	discordChannelId?: string | null;
+	platform?: string;
+	serverId?: string | null;
+	channelId?: string | null;
 	createdAt?: Date | string;
 	updatedAt?: Date | string;
 	QuinConversationSummary?: Prisma.QuinConversationSummaryCreateNestedOneWithoutQuinConversationInput;
@@ -490,8 +513,9 @@ export type QuinConversationUncheckedCreateWithoutQuinConversationMessageInput =
 	id?: number;
 	userId: string;
 	username: string;
-	discordServerId?: string | null;
-	discordChannelId?: string | null;
+	platform?: string;
+	serverId?: string | null;
+	channelId?: string | null;
 	createdAt?: Date | string;
 	updatedAt?: Date | string;
 	QuinConversationSummary?: Prisma.QuinConversationSummaryUncheckedCreateNestedOneWithoutQuinConversationInput;
@@ -528,8 +552,9 @@ export type QuinConversationUpdateToOneWithWhereWithoutQuinConversationMessageIn
 export type QuinConversationUpdateWithoutQuinConversationMessageInput = {
 	userId?: Prisma.StringFieldUpdateOperationsInput | string;
 	username?: Prisma.StringFieldUpdateOperationsInput | string;
-	discordServerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
-	discordChannelId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+	platform?: Prisma.StringFieldUpdateOperationsInput | string;
+	serverId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+	channelId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
 	createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 	updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 	QuinConversationSummary?: Prisma.QuinConversationSummaryUpdateOneWithoutQuinConversationNestedInput;
@@ -539,8 +564,9 @@ export type QuinConversationUncheckedUpdateWithoutQuinConversationMessageInput =
 	id?: Prisma.IntFieldUpdateOperationsInput | number;
 	userId?: Prisma.StringFieldUpdateOperationsInput | string;
 	username?: Prisma.StringFieldUpdateOperationsInput | string;
-	discordServerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
-	discordChannelId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+	platform?: Prisma.StringFieldUpdateOperationsInput | string;
+	serverId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+	channelId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
 	createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 	updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 	QuinConversationSummary?: Prisma.QuinConversationSummaryUncheckedUpdateOneWithoutQuinConversationNestedInput;
@@ -549,8 +575,9 @@ export type QuinConversationUncheckedUpdateWithoutQuinConversationMessageInput =
 export type QuinConversationCreateWithoutQuinConversationSummaryInput = {
 	userId: string;
 	username: string;
-	discordServerId?: string | null;
-	discordChannelId?: string | null;
+	platform?: string;
+	serverId?: string | null;
+	channelId?: string | null;
 	createdAt?: Date | string;
 	updatedAt?: Date | string;
 	QuinConversationMessage?: Prisma.QuinConversationMessageCreateNestedManyWithoutQuinConversationInput;
@@ -560,8 +587,9 @@ export type QuinConversationUncheckedCreateWithoutQuinConversationSummaryInput =
 	id?: number;
 	userId: string;
 	username: string;
-	discordServerId?: string | null;
-	discordChannelId?: string | null;
+	platform?: string;
+	serverId?: string | null;
+	channelId?: string | null;
 	createdAt?: Date | string;
 	updatedAt?: Date | string;
 	QuinConversationMessage?: Prisma.QuinConversationMessageUncheckedCreateNestedManyWithoutQuinConversationInput;
@@ -598,8 +626,9 @@ export type QuinConversationUpdateToOneWithWhereWithoutQuinConversationSummaryIn
 export type QuinConversationUpdateWithoutQuinConversationSummaryInput = {
 	userId?: Prisma.StringFieldUpdateOperationsInput | string;
 	username?: Prisma.StringFieldUpdateOperationsInput | string;
-	discordServerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
-	discordChannelId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+	platform?: Prisma.StringFieldUpdateOperationsInput | string;
+	serverId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+	channelId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
 	createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 	updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 	QuinConversationMessage?: Prisma.QuinConversationMessageUpdateManyWithoutQuinConversationNestedInput;
@@ -609,8 +638,9 @@ export type QuinConversationUncheckedUpdateWithoutQuinConversationSummaryInput =
 	id?: Prisma.IntFieldUpdateOperationsInput | number;
 	userId?: Prisma.StringFieldUpdateOperationsInput | string;
 	username?: Prisma.StringFieldUpdateOperationsInput | string;
-	discordServerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
-	discordChannelId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+	platform?: Prisma.StringFieldUpdateOperationsInput | string;
+	serverId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+	channelId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
 	createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 	updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 	QuinConversationMessage?: Prisma.QuinConversationMessageUncheckedUpdateManyWithoutQuinConversationNestedInput;
@@ -660,8 +690,9 @@ export type QuinConversationSelect<
 		id?: boolean;
 		userId?: boolean;
 		username?: boolean;
-		discordServerId?: boolean;
-		discordChannelId?: boolean;
+		platform?: boolean;
+		serverId?: boolean;
+		channelId?: boolean;
 		createdAt?: boolean;
 		updatedAt?: boolean;
 		QuinConversationMessage?:
@@ -682,8 +713,9 @@ export type QuinConversationSelectCreateManyAndReturn<
 		id?: boolean;
 		userId?: boolean;
 		username?: boolean;
-		discordServerId?: boolean;
-		discordChannelId?: boolean;
+		platform?: boolean;
+		serverId?: boolean;
+		channelId?: boolean;
 		createdAt?: boolean;
 		updatedAt?: boolean;
 	},
@@ -697,8 +729,9 @@ export type QuinConversationSelectUpdateManyAndReturn<
 		id?: boolean;
 		userId?: boolean;
 		username?: boolean;
-		discordServerId?: boolean;
-		discordChannelId?: boolean;
+		platform?: boolean;
+		serverId?: boolean;
+		channelId?: boolean;
 		createdAt?: boolean;
 		updatedAt?: boolean;
 	},
@@ -709,8 +742,9 @@ export type QuinConversationSelectScalar = {
 	id?: boolean;
 	userId?: boolean;
 	username?: boolean;
-	discordServerId?: boolean;
-	discordChannelId?: boolean;
+	platform?: boolean;
+	serverId?: boolean;
+	channelId?: boolean;
 	createdAt?: boolean;
 	updatedAt?: boolean;
 };
@@ -718,7 +752,7 @@ export type QuinConversationSelectScalar = {
 export type QuinConversationOmit<
 	ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs
 > = runtime.Types.Extensions.GetOmit<
-	'id' | 'userId' | 'username' | 'discordServerId' | 'discordChannelId' | 'createdAt' | 'updatedAt',
+	'id' | 'userId' | 'username' | 'platform' | 'serverId' | 'channelId' | 'createdAt' | 'updatedAt',
 	ExtArgs['result']['quinConversation']
 >;
 export type QuinConversationInclude<
@@ -748,8 +782,9 @@ export type $QuinConversationPayload<
 			id: number;
 			userId: string;
 			username: string;
-			discordServerId: string | null;
-			discordChannelId: string | null;
+			platform: string;
+			serverId: string | null;
+			channelId: string | null;
 			createdAt: Date;
 			updatedAt: Date;
 		},
@@ -1355,8 +1390,9 @@ export interface QuinConversationFieldRefs {
 	readonly id: Prisma.FieldRef<'QuinConversation', 'Int'>;
 	readonly userId: Prisma.FieldRef<'QuinConversation', 'String'>;
 	readonly username: Prisma.FieldRef<'QuinConversation', 'String'>;
-	readonly discordServerId: Prisma.FieldRef<'QuinConversation', 'String'>;
-	readonly discordChannelId: Prisma.FieldRef<'QuinConversation', 'String'>;
+	readonly platform: Prisma.FieldRef<'QuinConversation', 'String'>;
+	readonly serverId: Prisma.FieldRef<'QuinConversation', 'String'>;
+	readonly channelId: Prisma.FieldRef<'QuinConversation', 'String'>;
 	readonly createdAt: Prisma.FieldRef<'QuinConversation', 'DateTime'>;
 	readonly updatedAt: Prisma.FieldRef<'QuinConversation', 'DateTime'>;
 }

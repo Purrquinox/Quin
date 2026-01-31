@@ -82,6 +82,7 @@ export interface Friend {
 export interface Secrets {
 	discord: DiscordSecret;
 	x: XSecret;
+	tavily: TavilySecret;
 }
 
 export interface DiscordSecret {
@@ -95,4 +96,8 @@ export interface XSecret {
 	access_secret: string;
 	app_key: string;
 	app_secret: string;
+}
+
+export interface TavilySecret {
+	api_key: string;
 }

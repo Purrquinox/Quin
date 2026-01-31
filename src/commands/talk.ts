@@ -1,7 +1,7 @@
 import AIMascotService from '../ai.js';
 
 const aiService = new AIMascotService({
-	model: 'gpt-3.5-turbo',
+	model: 'gpt-5-mini',
 	maxTokens: 2048,
 	temperature: 0.2,
 	enableTwitter: true,

@@ -241,15 +241,16 @@ model QuinConversation {
   id               Int               @id @default(autoincrement())
   userId           String
   username         String
-  discordServerId  String?
-  discordChannelId String?
+  platform         String            @default("discord") // Platform: discord, slack, telegram, etc.
+  serverId         String?           // Platform-specific server/workspace/team ID
+  channelId        String?           // Platform-specific channel/room ID
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @updatedAt
   QuinConversationMessage QuinConversationMessage[]
   QuinConversationSummary QuinConversationSummary?
 
   @@index([userId])
-  @@index([discordServerId, discordChannelId])
+  @@index([platform, serverId, channelId])
 }
 
 model QuinConversationMessage {

@@ -3,7 +3,7 @@ import { DiscordClient } from '../discord.js';
 
 export const once = true;
 
-const ready = (client: DiscordClient) => {
+const clientReady = (client: DiscordClient) => {
 	console.log(
 		`⚡ ${client.user.tag} is online. Chaos protocol initiated. Let's burn some logs and debug some dreams.`
 	);
@@ -21,4 +21,4 @@ const ready = (client: DiscordClient) => {
 	client.user.setStatus('online');
 	console.log('✅ Bot is fully ready and operational!');
 };
-export default ready;
+export default clientReady;

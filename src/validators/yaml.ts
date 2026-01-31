@@ -72,13 +72,18 @@ export const xSecretSchema = z.object({
 	app_secret: z.string()
 });
 
+export const tavilySecretSchema = z.object({
+	api_key: z.string()
+});
+
 export const designSchema = z.object({
 	visual: visualSchema
 });
 
 export const secretsSchema = z.object({
 	discord: discordSecretSchema,
-	x: xSecretSchema
+	x: xSecretSchema,
+	tavily: tavilySecretSchema
 });
 
 export const aiDataSchema = z.object({
