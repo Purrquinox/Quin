@@ -4,6 +4,7 @@ import { chatRoutes } from './routes/chat.routes.js';
 // import { conversationRoutes } from './routes/conversation.routes.js';
 // import { userRoutes } from './routes/user.routes.js';
 import { createMiddleware } from 'hono/factory';
+import { compress } from 'hono/compress';
 import { encode } from 'cbor2';
 
 declare module 'hono' {
@@ -51,7 +52,8 @@ const cborMiddleware = createMiddleware(async (c, next) => {
 export function createAPI() {
 	const app = new OpenAPIHono();
 	app.use('/api/*', cborMiddleware);
-
+    app.use(compress());
+    
 	// Health check
 	app.get('/health', (c) => c.render({ status: 'ok', timestamp: new Date().toISOString() }));
 
