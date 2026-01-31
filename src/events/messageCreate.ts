@@ -7,7 +7,7 @@ const aiService = new AIMascotService({
 	model: 'gpt-4o-mini',
 	temperature: 0.8,
 	maxTokens: 2048,
-	enableTwitter: false, // Set to true if you want Twitter integration
+	enableTwitter: true, // Enable Twitter integration
 	maxHistoryMessages: 7 // Reduced for token efficiency
 });
 

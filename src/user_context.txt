@@ -1,4 +1,4 @@
-User: ${data.userInfo.username} (${data.userInfo.userId})
-${data.learnedContext ? data.learnedContext : ''}
-Context: ${JSON.stringify(data.userInfo.context)}
-Message: ${data.message}
+User: ${data.userInfo.username}
+${data.learnedContext ? `[Already saved facts - DO NOT use learn_user_fact for these: ${data.learnedContext}]` : ''}
+
+${data.message}

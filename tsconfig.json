@@ -14,5 +14,5 @@
 		"types": ["node"],
 		"typeRoots": ["./src/types", "./node_modules/@types"]
 	},
-	"include": ["src/**/*", "src/prompt.txt"]
+	"include": ["src/**/*", "src/prompt.txt", "src/user_context.txt"]
 }

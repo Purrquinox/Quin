@@ -1,9 +1,14 @@
 import { generateText, streamText, tool, gateway, type ModelMessage, ToolSet } from 'ai';
 import { z } from 'zod';
 import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { TwitterApi } from 'twitter-api-v2';
 import { data, secrets } from './helpers/data.js';
 import { prisma } from './lib/prisma.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 interface AIMascotConfig {
 	model: string;
@@ -23,7 +28,7 @@ export interface UserInfo {
 	discordChannelId?: string;
 }
 
-const template = fs.readFileSync('./dist/prompt.txt', 'utf-8');
+const template = fs.readFileSync(path.join(__dirname, '../dist/prompt.txt'), 'utf-8');
 const renderTemplate = new Function('data', `return \`${template}\`;`);
 const personality = renderTemplate(data);
 
@@ -80,7 +85,7 @@ export class AIMascotService {
 		if (userInfo) {
 			tools['learn_user_fact'] = tool({
 				description:
-					'Remember important information about a user for future conversations. Use this when you learn something new about them - their preferences, interests, relationships, personality traits, or any memorable facts. This helps you build a meaningful relationship with each person.',
+					'Store NEW factual information about the user. CRITICAL RULES: 1) NEVER use this for facts already shown in "[ALREADY KNOWN]" section - those are already stored! 2) ONLY use when user shares something brand new about themselves 3) DO NOT use for: casual responses, questions, information already in context, or things just discussed. This tool should be rare - maybe 1 in 20 messages.',
 				inputSchema: z.object({
 					fact: z
 						.string()
@@ -150,13 +155,15 @@ export class AIMascotService {
 			},
 			include: {
 				QuinConversationMessage: {
-					orderBy: { createdAt: 'asc' },
+					orderBy: { createdAt: 'desc' },
 					take: this.config.maxHistoryMessages
 				}
 			}
 		});
 
 		if (existing) {
+			// Reverse to get chronological order after taking the most recent
+			existing.QuinConversationMessage.reverse();
 			return existing;
 		}
 
@@ -176,6 +183,28 @@ export class AIMascotService {
 	// Learn and store a fact about a user
 	private async learnUserFact(userId: string, username: string, fact: string, category: string) {
 		try {
+			// Get existing profile
+			const existingProfile = await prisma.quinUserProfile.findUnique({
+				where: { userId }
+			});
+
+			// Check if fact already exists (case-insensitive comparison)
+			const factLower = fact.toLowerCase().trim();
+			if (
+				existingProfile &&
+				existingProfile.facts.some((f) => f.toLowerCase().trim() === factLower)
+			) {
+				return {
+					success: true,
+					message: `I already know that about you! 😊`,
+					fact,
+					category,
+					duplicate: true,
+					totalFacts: existingProfile.facts.length
+				};
+			}
+
+			// Add new fact
 			const profile = await prisma.quinUserProfile.upsert({
 				where: { userId },
 				update: {
@@ -191,13 +220,12 @@ export class AIMascotService {
 				}
 			});
 
-			console.log(`📝 Learned about ${username}: ${fact} [${category}]`);
-
 			return {
 				success: true,
 				message: `Got it! I'll remember that about you. 💭`,
 				fact,
 				category,
+				duplicate: false,
 				totalFacts: profile.facts.length
 			};
 		} catch (error) {
@@ -246,22 +274,16 @@ export class AIMascotService {
 
 	// Convert database messages to Vercel AI SDK format
 	private convertToAIMessages(dbMessages: any[]): ModelMessage[] {
-		return dbMessages.map((msg) => {
-			const message: ModelMessage = {
-				role: msg.role as 'user' | 'assistant' | 'system' | 'tool',
-				content: msg.content
-			};
+		return dbMessages
+			.filter((msg) => msg.role !== 'tool') // Exclude tool messages to prevent re-execution
+			.map((msg) => {
+				const message: ModelMessage = {
+					role: msg.role as 'user' | 'assistant' | 'system',
+					content: msg.content
+				};
 
-			// Add tool call information if present
-			if (msg.toolCallId) {
-				(message as any).toolCallId = msg.toolCallId;
-			}
-			if (msg.toolName) {
-				(message as any).toolName = msg.toolName;
-			}
-
-			return message;
-		});
+				return message;
+			});
 	}
 
 	// Save message to database
@@ -294,11 +316,11 @@ export class AIMascotService {
 			// Get smart user context (token-efficient)
 			const learnedContext = await this.getUserContext(userInfo.userId, conversation.id);
 
-			// Build the user context for personalization
+			// Build the user context for personalization (for THIS message only)
 			let userContext: string;
 			try {
 				const contextData = { userInfo, message, learnedContext };
-				const template = fs.readFileSync('./dist/user_context.txt', 'utf-8');
+				const template = fs.readFileSync(path.join(__dirname, '../dist/user_context.txt'), 'utf-8');
 				const renderTemplate = new Function('data', `return \`${template}\`;`);
 				userContext = renderTemplate(contextData);
 			} catch (error) {
@@ -335,10 +357,31 @@ Message: ${message}`;
 				tools: tools
 			});
 
-			const finalResponse = result.text;
+			let finalResponse = result.text;
 
-			// Save user message to database
-			await this.saveMessage(conversation.id, 'user', userContext, {
+			// If no text response but tools were called, provide tool-specific fallback
+			if (
+				(!finalResponse || finalResponse.trim().length === 0) &&
+				result.toolCalls &&
+				result.toolCalls.length > 0
+			) {
+				const toolName = result.toolCalls[0].toolName;
+				if (toolName === 'learn_user_fact') {
+					finalResponse = "Got it! I've made a note of that. 💭";
+				} else if (toolName === 'post_tweet') {
+					finalResponse = 'Tweet posted! 🐦✨';
+				} else {
+					finalResponse = 'Done! ✅';
+				}
+			}
+
+			// If still no response, throw error
+			if (!finalResponse || finalResponse.trim().length === 0) {
+				throw new Error('No response generated from AI');
+			}
+
+			// Save CLEAN user message to database (without the context wrapper)
+			await this.saveMessage(conversation.id, 'user', message, {
 				userInfo,
 				originalMessage: message
 			});
@@ -346,19 +389,9 @@ Message: ${message}`;
 			// Save assistant response to database
 			await this.saveMessage(conversation.id, 'assistant', finalResponse);
 
-			// Save tool calls if any
-			if (result.toolCalls && result.toolCalls.length > 0) {
-				for (const toolCall of result.toolCalls) {
-					await this.saveMessage(
-						conversation.id,
-						'tool',
-						JSON.stringify('args' in toolCall ? toolCall.args : {}),
-						{ toolResult: result.toolResults?.find((r) => r.toolCallId === toolCall.toolCallId) },
-						toolCall.toolCallId,
-						toolCall.toolName
-					);
-				}
-			}
+			// Note: We intentionally DON'T save tool calls to prevent re-execution
+			// Tool calls are ephemeral - they execute once and their results are incorporated
+			// into the assistant's final response
 
 			// Auto-summarize if conversation gets too long (every 15 messages)
 			if (conversation.QuinConversationMessage.length >= 15) {
@@ -399,7 +432,7 @@ Message: ${message}`;
 			let userContext: string;
 			try {
 				const contextData = { userInfo, message, learnedContext };
-				const template = fs.readFileSync('./dist/user_context.txt', 'utf-8');
+				const template = fs.readFileSync(path.join(__dirname, '../dist/user_context.txt'), 'utf-8');
 				const renderTemplate = new Function('data', `return \`${template}\`;`);
 				userContext = renderTemplate(contextData);
 			} catch (error) {
@@ -486,12 +519,6 @@ Message: ${message}`;
 
 			// Update last tweet time
 			this.lastTweetTime = now;
-
-			// Log the tweet for monitoring
-			console.log(`Tweet posted [${args.tweet_type}]:`, args.content);
-			if (args.context) {
-				console.log(`Context:`, args.context);
-			}
 
 			return {
 				success: true,
@@ -636,8 +663,6 @@ Message: ${message}`;
 					id: { notIn: messagesToKeep }
 				}
 			});
-
-			console.log(`📊 Summarized conversation ${conversationId}, compressed to 7 messages`);
 
 			return {
 				success: true,

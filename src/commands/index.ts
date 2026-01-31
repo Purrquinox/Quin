@@ -1,6 +1,6 @@
 import { readdirSync } from 'fs';
 import { join, dirname } from 'path';
-import { fileURLToPath } from 'url';
+import { fileURLToPath, pathToFileURL } from 'url';
 import { discordClient } from '../discord.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -13,7 +13,8 @@ const LoadDiscordCommands = async () => {
 
 	for (const file of eventFiles) {
 		const eventName = file.replace('.js', '');
-		const eventModule = await import(join(__dirname, file));
+		const filePath = join(__dirname, file);
+		const eventModule = await import(pathToFileURL(filePath).href);
 		const eventHandler = eventModule.default || eventModule[eventName];
 
 		if (typeof eventHandler === 'function') {
