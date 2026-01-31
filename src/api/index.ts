@@ -13,41 +13,37 @@ declare module 'hono' {
 }
 
 const cborMiddleware = createMiddleware(async (c, next) => {
-	const accept = c.req.header('accept') ?? '';
+	c.setRenderer((content) => {
+		const accept = c.req.header('accept') ?? '';
 
-	if (accept.includes('application/cbor')) {
-		c.setRenderer((content) => {
-			const accept = c.req.header('accept') ?? '';
+		// CBOR path
+		if (accept.includes('application/cbor')) {
+			const encoded = encode(content);
+			const buffer =
+				encoded instanceof ArrayBuffer
+					? encoded
+					: encoded instanceof Uint8Array
+						? encoded.buffer instanceof ArrayBuffer
+							? encoded.buffer
+							: encoded.slice().buffer
+						: new Uint8Array(encoded).slice().buffer;
 
-			// CBOR path
-			if (accept.includes('application/cbor')) {
-				const encoded = encode(content);
-				const buffer =
-					encoded instanceof ArrayBuffer
-						? encoded
-						: encoded instanceof Uint8Array
-							? encoded.buffer instanceof ArrayBuffer
-								? encoded.buffer
-								: encoded.slice().buffer
-							: new Uint8Array(encoded).slice().buffer;
-
-				return new Response(new Blob([buffer]), {
-					headers: {
-						'Content-Type': 'application/cbor',
-						Vary: 'Accept'
-					}
-				});
-			}
-
-			// ✅ JSON fallback (THIS WAS MISSING)
-			return new Response(JSON.stringify(content), {
+			return new Response(new Blob([buffer]), {
 				headers: {
-					'Content-Type': 'application/json; charset=utf-8',
+					'Content-Type': 'application/cbor',
 					Vary: 'Accept'
 				}
 			});
+		}
+
+		// JSON fallback
+		return new Response(JSON.stringify(content), {
+			headers: {
+				'Content-Type': 'application/json; charset=utf-8',
+				Vary: 'Accept'
+			}
 		});
-	}
+	});
 
 	await next();
 });
