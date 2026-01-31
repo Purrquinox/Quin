@@ -2,6 +2,20 @@ import { generateText, gateway } from 'ai';
 import { prisma } from '../lib/prisma.js';
 
 export class UserProfileService {
+	async getProfile(userId: string) {
+		return await prisma.quinUserProfile.findUnique({ where: { userId } });
+	}
+
+	async learnFact(
+		userId: string,
+		username: string,
+		fact: string,
+		category: string,
+		model: string = 'gpt-4o-mini'
+	) {
+		return this.learnUserFact(model, userId, username, fact, category);
+	}
+
 	async learnUserFact(
 		model: string,
 		userId: string,
