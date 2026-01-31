@@ -12,19 +12,6 @@ declare module 'hono' {
 	}
 }
 
-function toArrayBuffer(data: ArrayBuffer | SharedArrayBuffer | Uint8Array): ArrayBuffer {
-	if (data instanceof ArrayBuffer) {
-		return data;
-	}
-
-	if (data instanceof Uint8Array) {
-		return data.buffer instanceof ArrayBuffer ? data.buffer : data.slice().buffer;
-	}
-
-	// SharedArrayBuffer → ArrayBuffer (explicit copy)
-	return new Uint8Array(data).slice().buffer;
-}
-
 const cborMiddleware = createMiddleware(async (c, next) => {
 	const accept = c.req.header('accept') ?? '';
 
