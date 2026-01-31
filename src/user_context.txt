@@ -1,0 +1,4 @@
+User: ${data.userInfo.username} (${data.userInfo.userId})
+${data.learnedContext ? data.learnedContext : ''}
+Context: ${JSON.stringify(data.userInfo.context)}
+Message: ${data.message}
