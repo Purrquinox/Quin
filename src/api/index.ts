@@ -30,12 +30,32 @@ const cborMiddleware = createMiddleware(async (c, next) => {
 
 	if (accept.includes('application/cbor')) {
 		c.setRenderer((content) => {
-			const encoded = encode(content);
-			const buffer = toArrayBuffer(encoded);
+			const accept = c.req.header('accept') ?? '';
 
-			return new Response(new Blob([buffer], { type: 'application/cbor' }), {
+			// CBOR path
+			if (accept.includes('application/cbor')) {
+				const encoded = encode(content);
+				const buffer =
+					encoded instanceof ArrayBuffer
+						? encoded
+						: encoded instanceof Uint8Array
+							? encoded.buffer instanceof ArrayBuffer
+								? encoded.buffer
+								: encoded.slice().buffer
+							: new Uint8Array(encoded).slice().buffer;
+
+				return new Response(new Blob([buffer]), {
+					headers: {
+						'Content-Type': 'application/cbor',
+						Vary: 'Accept'
+					}
+				});
+			}
+
+			// ✅ JSON fallback (THIS WAS MISSING)
+			return new Response(JSON.stringify(content), {
 				headers: {
-					'Content-Type': 'application/cbor',
+					'Content-Type': 'application/json; charset=utf-8',
 					Vary: 'Accept'
 				}
 			});
