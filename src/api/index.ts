@@ -12,22 +12,45 @@ declare module 'hono' {
 	}
 }
 
-const cborRenderer = createMiddleware(async (c, next) => {
-	c.setRenderer((content) => {
-		const encoded = encode(content);
-		return new Response(encoded.buffer.slice(0) as ArrayBuffer, {
-			headers: { 'Content-Type': 'application/cbor' }
+function toArrayBuffer(data: ArrayBuffer | SharedArrayBuffer | Uint8Array): ArrayBuffer {
+	if (data instanceof ArrayBuffer) {
+		return data;
+	}
+
+	if (data instanceof Uint8Array) {
+		return data.buffer instanceof ArrayBuffer ? data.buffer : data.slice().buffer;
+	}
+
+	// SharedArrayBuffer → ArrayBuffer (explicit copy)
+	return new Uint8Array(data).slice().buffer;
+}
+
+const cborMiddleware = createMiddleware(async (c, next) => {
+	const accept = c.req.header('accept') ?? '';
+
+	if (accept.includes('application/cbor')) {
+		c.setRenderer((content) => {
+			const encoded = encode(content);
+			const buffer = toArrayBuffer(encoded);
+
+			return new Response(new Blob([buffer], { type: 'application/cbor' }), {
+				headers: {
+					'Content-Type': 'application/cbor',
+					Vary: 'Accept'
+				}
+			});
 		});
-	});
+	}
+
 	await next();
 });
 
 export function createAPI() {
 	const app = new OpenAPIHono();
-	app.use(cborRenderer);
+	app.use('/api/*', cborMiddleware);
 
 	// Health check
-	app.get('/health', (c) => c.json({ status: 'ok', timestamp: new Date().toISOString() }));
+	app.get('/health', (c) => c.render({ status: 'ok', timestamp: new Date().toISOString() }));
 
 	// API routes
 	app.route('/api/chat', chatRoutes);

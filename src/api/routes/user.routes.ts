@@ -39,13 +39,13 @@ userRoutes.openapi(getProfileRoute, (async (c) => {
 	const profile = await userProfileService.getProfile(userId);
 
 	if (!profile) {
-		return c.json({
+		return c.render({
 			success: true,
 			profile: null
 		});
 	}
 
-	return c.json({
+	return c.render({
 		success: true,
 		profile: {
 			userId: profile.userId,
@@ -100,5 +100,5 @@ userRoutes.openapi(addFactRoute, (async (c) => {
 
 	const result = await userProfileService.learnFact(userId, username, fact, category);
 
-	return c.json(result);
+	return c.render(result);
 }) as any);

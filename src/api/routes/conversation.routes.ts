@@ -50,7 +50,7 @@ conversationRoutes.openapi(getHistoryRoute, (async (c) => {
 		channelId
 	);
 
-	return c.json({
+	return c.render({
 		success: true,
 		messages: messages.map((m) => ({
 			id: m.id,
@@ -100,7 +100,7 @@ conversationRoutes.openapi(clearHistoryRoute, (async (c) => {
 	const { userId, platform, serverId, channelId } = c.req.valid('query');
 	await aiService.clearConversationHistory(userId, platform || 'api', serverId, channelId);
 
-	return c.json({
+	return c.render({
 		success: true,
 		message: 'Conversation history cleared successfully'
 	});
@@ -136,5 +136,5 @@ conversationRoutes.openapi(summarizeRoute, (async (c) => {
 	const { conversationId } = c.req.valid('param');
 	const result = await aiService.summarizeConversation(parseInt(conversationId));
 
-	return c.json(result);
+	return c.render(result);
 }) as any);

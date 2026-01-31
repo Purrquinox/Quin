@@ -1,14 +1,10 @@
 import { z } from '@hono/zod-openapi';
 
 export const chatRequestSchema = z.object({
-	message: z
-		.string()
-		.min(1)
-		.max(4000)
-		.openapi({
-			description: 'User message to send to the AI',
-			example: 'Hello! Tell me about yourself.'
-		}),
+	message: z.string().min(1).max(4000).openapi({
+		description: 'User message to send to the AI',
+		example: 'Hello! Tell me about yourself.'
+	}),
 	userId: z.string().openapi({ description: 'Unique user identifier', example: 'user123' }),
 	username: z.string().openapi({ description: 'Username for context', example: 'john_doe' }),
 	platform: z
@@ -16,20 +12,14 @@ export const chatRequestSchema = z.object({
 		.optional()
 		.default('api')
 		.openapi({ description: 'Platform identifier (discord, slack, api, etc.)', example: 'api' }),
-	serverId: z
-		.string()
-		.optional()
-		.openapi({
-			description: 'Optional server/workspace ID for conversation context',
-			example: 'server456'
-		}),
-	channelId: z
-		.string()
-		.optional()
-		.openapi({
-			description: 'Optional channel/room ID for conversation context',
-			example: 'channel789'
-		}),
+	serverId: z.string().optional().openapi({
+		description: 'Optional server/workspace ID for conversation context',
+		example: 'server456'
+	}),
+	channelId: z.string().optional().openapi({
+		description: 'Optional channel/room ID for conversation context',
+		example: 'channel789'
+	}),
 	context: z
 		.record(z.string(), z.any())
 		.optional()

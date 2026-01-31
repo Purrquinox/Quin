@@ -62,16 +62,15 @@ chatRoutes.openapi(chatRoute, async (c) => {
 
 		const result = await aiService.chat(body.message, userInfo);
 
-		return c.json(result, result.success ? 200 : 500);
+		c.status(result.success ? 200 : 500);
+		return c.render(result);
 	} catch (error) {
 		console.error('Chat API Error:', error);
-		return c.json(
-			{
-				success: false,
-				error: error instanceof Error ? error.message : 'Unknown error',
-				response: 'Failed to process your message. Please try again.'
-			},
-			500
-		);
+		c.status(500);
+		return c.render({
+			success: false,
+			error: error instanceof Error ? error.message : 'Unknown error',
+			response: 'Failed to process your message. Please try again.'
+		});
 	}
 });
