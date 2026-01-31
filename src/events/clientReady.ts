@@ -13,12 +13,12 @@ const clientReady = (client: DiscordClient) => {
 
 	// Set bot activity/status
 	client.user.setActivity({
-		name: 'with quantum mechanics',
-		type: ActivityType.Playing
+		name: 'powered by caffeine and violations',
+		type: ActivityType.Custom
 	});
 
 	// Set status (online, idle, dnd, invisible)
-	client.user.setStatus('online');
+	client.user.setStatus('dnd');
 	console.log('✅ Bot is fully ready and operational!');
 };
 export default clientReady;
