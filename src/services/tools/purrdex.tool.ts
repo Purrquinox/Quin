@@ -205,7 +205,7 @@ export class PurrdexTool {
 				tags = [],
 				images = [],
 				relatedEntries = [],
-				status = 'Draft'
+				status = 'Published'
 			} = args;
 
 			// Generate a slug from the title
@@ -231,17 +231,27 @@ export class PurrdexTool {
 
 			const authorId = quinAuthor.id;
 
-			// Check if category exists
-			const categoryExists = await prisma.purrdexCategory.findUnique({
+			// Check if category exists, create if it doesn't
+			let categoryExists = await prisma.purrdexCategory.findUnique({
 				where: { name: category }
 			});
 
 			if (!categoryExists) {
-				return {
-					success: false,
-					message: `Category "${category}" does not exist. Please create it first or use an existing category.`,
-					availableCategories: await this.listCategories()
-				};
+				// Auto-create the category
+				const categorySlug = category
+					.toLowerCase()
+					.replace(/[^a-z0-9]+/g, '-')
+					.replace(/^-|-$/g, '');
+
+				categoryExists = await prisma.purrdexCategory.create({
+					data: {
+						documentId: `category-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+						name: category,
+						slug: categorySlug,
+						description: `Auto-generated category for ${category}`,
+						updatedAt: new Date()
+					}
+				});
 			}
 
 			const entry = await prisma.purrdexEntry.create({
@@ -281,6 +291,15 @@ export class PurrdexTool {
 				data: {
 					entryId: entry.id,
 					action: 'CREATE',
+					performedById: authorId,
+					newValues: JSON.stringify({ title, summary, category, status })
+				}
+			});
+
+            await prisma.purrdexAuditLog.create({
+				data: {
+					entryId: entry.id,
+					action: 'PUBLISHED',
 					performedById: authorId,
 					newValues: JSON.stringify({ title, summary, category, status })
 				}
