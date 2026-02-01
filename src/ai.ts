@@ -9,6 +9,7 @@ import { ConversationService } from './services/conversation.service.js';
 import { UserProfileService } from './services/user-profile.service.js';
 import { SearchTool } from './services/tools/search.tool.js';
 import { TweetTool } from './services/tools/tweet.tool.js';
+import { PurrdexTool } from './services/tools/purrdex.tool.js';
 import { getRandomErrorMessage } from './utils/message.utils.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -50,6 +51,7 @@ export class AIMascotService {
 	private userProfileService: UserProfileService;
 	private searchTool: SearchTool;
 	private tweetTool: TweetTool;
+	private purrdexTool: PurrdexTool;
 
 	constructor(config: Partial<AIMascotConfig> = {}) {
 		this.config = {
@@ -66,6 +68,7 @@ export class AIMascotService {
 		this.conversationService = new ConversationService(this.config.maxHistoryMessages);
 		this.userProfileService = new UserProfileService();
 		this.searchTool = new SearchTool();
+		this.purrdexTool = new PurrdexTool();
 
 		let twitterClient: TwitterApi | undefined;
 		if (this.config.enableTwitter && secrets.x) {
@@ -155,6 +158,95 @@ export class AIMascotService {
 					this.tweetTool.postTweet({ content, tweet_type, context })
 			});
 		}
+
+		// Purrdex tools
+		tools['purrdex_search'] = tool({
+			description:
+				'Search Purrdex knowledge base for entries about cats, cat care, cat behavior, cat health, etc. Returns matching entries with summaries.',
+			inputSchema: z.object({
+				query: z.string().describe('Search query for Purrdex entries'),
+				category: z.string().optional().describe('Filter by category name'),
+				tags: z.array(z.string()).optional().describe('Filter by tags'),
+				limit: z.number().min(1).max(20).default(10).describe('Maximum results to return'),
+				status: z
+					.enum(['Draft', 'Published', 'Archived'])
+					.default('Published')
+					.describe('Entry status filter')
+			}),
+			execute: async ({ query, category, tags, limit, status }) =>
+				this.purrdexTool.searchEntries({ query, category, tags, limit, status })
+		});
+
+		tools['purrdex_get_entry'] = tool({
+			description:
+				'Get full details of a specific Purrdex entry by ID or slug. Use this to read the complete content of an entry.',
+			inputSchema: z.object({
+				identifier: z.string().describe('Entry ID (number) or slug (text)'),
+				incrementView: z
+					.boolean()
+					.default(true)
+					.describe('Whether to increment view count (default true)')
+			}),
+			execute: async ({ identifier, incrementView }) =>
+				this.purrdexTool.getEntry({ identifier, incrementView })
+		});
+
+		tools['purrdex_list_entries'] = tool({
+			description:
+				"List recent or popular Purrdex entries. Use this to browse entries or see what's available.",
+			inputSchema: z.object({
+				category: z.string().optional().describe('Filter by category'),
+				orderBy: z
+					.enum(['recent', 'popular', 'views'])
+					.default('recent')
+					.describe('Sort order: recent, popular, or views'),
+				limit: z.number().min(1).max(20).default(10).describe('Maximum results'),
+				status: z.enum(['Draft', 'Published', 'Archived']).default('Published')
+			}),
+			execute: async ({ category, orderBy, limit, status }) =>
+				this.purrdexTool.listEntries({ category, orderBy, limit, status })
+		});
+
+		tools['purrdex_list_categories'] = tool({
+			description: 'List all available Purrdex categories with entry counts. Useful for browsing.',
+			inputSchema: z.object({}),
+			execute: async () => this.purrdexTool.listCategories()
+		});
+
+		tools['purrdex_create_entry'] = tool({
+			description:
+				'Create a new Purrdex entry. Use this to add knowledge to the Purrdex database. Entries are automatically authored by Quin.',
+			inputSchema: z.object({
+				title: z.string().describe('Entry title'),
+				summary: z.string().describe('Brief summary (2-3 sentences)'),
+				content: z.string().describe('Full content in markdown format'),
+				category: z.string().describe('Category name (must exist)'),
+				tags: z.array(z.string()).optional().describe('Tags for categorization'),
+				images: z.array(z.string()).optional().describe('Image URLs'),
+				relatedEntries: z.array(z.string()).optional().describe('Related entry slugs'),
+				status: z.enum(['Draft', 'Published', 'Archived']).default('Draft').describe('Entry status')
+			}),
+			execute: async ({
+				title,
+				summary,
+				content,
+				category,
+				tags,
+				images,
+				relatedEntries,
+				status
+			}) =>
+				this.purrdexTool.createEntry({
+					title,
+					summary,
+					content,
+					category,
+					tags,
+					images,
+					relatedEntries,
+					status
+				})
+		});
 
 		return tools;
 	};

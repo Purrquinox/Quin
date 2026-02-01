@@ -52,8 +52,8 @@ const cborMiddleware = createMiddleware(async (c, next) => {
 export function createAPI() {
 	const app = new OpenAPIHono();
 	app.use('/api/*', cborMiddleware);
-    app.use(compress());
-    
+	app.use(compress());
+
 	// Health check
 	app.get('/health', (c) => c.render({ status: 'ok', timestamp: new Date().toISOString() }));
 
