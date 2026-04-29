@@ -296,7 +296,7 @@ export class PurrdexTool {
 				}
 			});
 
-            await prisma.purrdexAuditLog.create({
+			await prisma.purrdexAuditLog.create({
 				data: {
 					entryId: entry.id,
 					action: 'PUBLISHED',

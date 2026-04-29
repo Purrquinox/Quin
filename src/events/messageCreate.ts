@@ -1,6 +1,7 @@
-import { EmbedBuilder, Message, OmitPartialGroupDMChannel } from 'discord.js';
+import { EmbedBuilder, Message, OmitPartialGroupDMChannel, ThreadChannel } from 'discord.js';
 import { DiscordClient } from '../discord.js';
 import AIMascotService from '../ai.js';
+import { promptBuilderService } from '../services/prompt-builder.service.js';
 
 // Initialize AI service (you can also do this in your main bot setup)
 const aiService = new AIMascotService({
@@ -21,13 +22,27 @@ const messageCreate = async (message: OmitPartialGroupDMChannel<Message<boolean>
 	if (!message.content) return;
 
 	try {
+		// Route to active prompt-builder session if one exists for this user+channel
+		if (promptBuilderService.has(message.author.id, message.channelId)) {
+			await message.channel.sendTyping();
+			const reply = await promptBuilderService.handle(
+				message.author.id,
+				message.channelId,
+				message.content
+			);
+			await message.reply(reply);
+			return;
+		}
+
 		// Check if bot is mentioned or message is in DM
 		const isMentioned = message.mentions.has(client.user!);
 		const isDM = message.channel.isDMBased();
+		const isBotThread =
+			message.channel.isThread() && (message.channel as ThreadChannel).ownerId === client.user!.id;
 		const hasPrefix = message.content.startsWith('!');
 
-		// Handle AI conversations when mentioned or in DMs
-		if (isMentioned || isDM) {
+		// Handle AI conversations when mentioned, in DMs, or inside a bot-created thread
+		if (isMentioned || isDM || isBotThread) {
 			// Remove mention from message if present
 			const cleanMessage = message.content.replace(/<@!?\d+>/g, '').trim();
 
@@ -44,7 +59,9 @@ const messageCreate = async (message: OmitPartialGroupDMChannel<Message<boolean>
 				userId: message.author.id,
 				username: message.author.username,
 				serverId: message.guildId || undefined,
-				channelId: message.channelId,
+				// Mentions and DMs are one-shot — unique channelId prevents history accumulation.
+				// Bot-owned threads use their real ID for persistent per-thread history.
+				channelId: isBotThread ? message.channelId : `oneshot-${Date.now()}`,
 				platform: 'discord',
 				context: {
 					displayName: message.member?.displayName || message.author.displayName,

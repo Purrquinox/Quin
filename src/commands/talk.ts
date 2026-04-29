@@ -1,30 +1,39 @@
 import AIMascotService from '../ai.js';
 
 const aiService = new AIMascotService({
-	model: 'gpt-5-mini',
+	model: 'gpt-4o-mini',
+	temperature: 0.8,
 	maxTokens: 2048,
-	temperature: 0.2,
-	enableTwitter: true,
-	twitterCooldown: 300000,
-	maxTweetLength: 280
+	enableTwitter: false,
+	maxHistoryMessages: 0
 });
 
 export const meta = {
-	name: 'sendmessage',
-	description: 'Send Message to Quin AI.',
-	cooldown: 1200000
+	name: 'talk',
+	description: 'Ask Quin a one-off question with no conversation history.',
+	cooldown: 5000
 };
 
 const command = async (message, args) => {
-	const data = args.join(' ').split(/ +/);
+	const text = args.join(' ').trim();
 
-	const response = await aiService.chat(data, {
+	if (!text) {
+		await message.reply('Please include a message. Usage: `!talk <message>`');
+		return;
+	}
+
+	await message.channel.sendTyping();
+
+	// Use a unique channelId per message so no history is shared between calls
+	const result = await aiService.chat(text, {
 		userId: message.author.id,
-		username: message.author.username
+		username: message.author.username,
+		serverId: message.guildId || undefined,
+		channelId: `oneshot-${Date.now()}`,
+		platform: 'discord'
 	});
 
-	message.reply({
-		content: response.response || 'I have nothing to say right now.'
-	});
+	await message.reply(result.response || 'Sorry, something went wrong!');
 };
+
 export default command;
